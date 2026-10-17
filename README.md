@@ -126,6 +126,13 @@ LICENSE                          MIT
 - PDF 逐页相似度没有达到 99%，原因是公式和表格的阅读顺序与 pdfjs 不同，不是丢字。
 - 安装包没有代码签名，首次运行时 Windows 可能弹出 SmartScreen 提示。
 
+## 参与贡献
+
+- 提交代码前请读 [CONTRIBUTING.md](CONTRIBUTING.md)。
+- 参与讨论请遵守 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。
+- 安全漏洞请不要公开提 Issue，按 [SECURITY.md](SECURITY.md) 私密报告。
+- 第三方素材与许可见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
 ## 许可
 
-MIT，见 [LICENSE](LICENSE)。`skills/interactive-study-guide/third-party/dafeiyu-pet/` 是内置陪练形象（MIT，原作者许可和出处见该目录）；再分发时请保留许可原文。
+MIT，见 [LICENSE](LICENSE)。内置的“大肥鱼”陪练形象等第三方素材的许可与署名见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)；再分发时请保留许可原文。

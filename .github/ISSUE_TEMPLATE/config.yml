@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全漏洞
+    url: https://github.com/PurpleRice-wasd/isg-studio-cpp/security/advisories/new
+    about: 请私密报告安全漏洞，不要公开提 Issue
+  - name: 使用文档
+    url: https://github.com/PurpleRice-wasd/isg-studio-cpp#readme
+    about: 下载、使用和已知限制先看 README

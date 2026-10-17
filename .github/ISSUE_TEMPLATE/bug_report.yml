@@ -1,0 +1,61 @@
+name: Bug 报告
+description: 程序崩溃、生成失败、页面行为不对
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。请不要粘贴 API Key、`%APPDATA%\isg-studio` 的内容、课件正文或他人的私人信息。
+  - type: input
+    id: version
+    attributes:
+      label: 版本
+      description: 在「关于」页或 exe 属性里能看到，例如 2.0.0。
+      placeholder: "2.0.0"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows 版本
+      placeholder: "Windows 11 24H2 / Windows 10 22H2"
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 尽量给出最小复现：哪一步、点了什么、用了什么材料。
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望结果
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+      description: 有报错、日志或截图可以贴在这里；请先脱敏。
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志（可选）
+      description: 位置在 %APPDATA%\isg-studio\isg-studio.log；请删掉路径、Key 和课件内容。
+      render: text
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 确认
+      options:
+        - label: 我已经搜索过现有 Issue，没有重复
+          required: true
+        - label: 我没有在 Issue 里粘贴 API Key、私人路径或课件正文
+          required: true
