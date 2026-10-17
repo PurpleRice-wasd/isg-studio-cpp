@@ -1,0 +1,2143 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>第 XX 章 · 讲练一体（骨架示例）</title>
+<!-- 不引外部字体：字体栈里已有本机回退（iPad 上是苹方），这样离线/查看器里打开零外部请求 -->
+<style>
+  :root{
+    --bg:#F3F6F4;
+    --surface:#FFFFFF;
+    --surface-2:#EAEFEC;
+    --ink:#131A17;
+    --ink-2:#48544E;
+    --ink-3:#79857F;
+    --rule:#DBE3DE;
+    --rule-strong:#C2CCC6;
+    --field:#2F8F63;          /* 风绿：主强调 */
+    --field-soft:#E6F4EC;
+    --teal:#2E8E9C;           /* 风元素青 */
+    --teal-soft:#E3F2F4;
+    --gold:#B98A1F;
+    --warn:#A93226;
+    --warn-soft:#FBEAE7;
+    --ok:#2C6B4A;
+    --ok-soft:#E4F1E9;
+    --shadow:0 1px 2px rgba(19,26,23,.05), 0 8px 24px -16px rgba(19,26,23,.25);
+    --font-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    --font-head:"Noto Serif SC","Songti SC",Georgia,serif;
+    --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0E1512; --surface:#16201B; --surface-2:#1F2B25;
+      --ink:#E5EFE9; --ink-2:#A5B3AC; --ink-3:#78857F;
+      --rule:#27332C; --rule-strong:#38463E;
+      --field:#7FD6A5; --field-soft:#13251B;
+      --teal:#6FD3DF; --teal-soft:#0F2427;
+      --gold:#E0B84E;
+      --warn:#E88272; --warn-soft:#2E1A19;
+      --ok:#69C495; --ok-soft:#132A1F;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0E1512; --surface:#16201B; --surface-2:#1F2B25;
+    --ink:#E5EFE9; --ink-2:#A5B3AC; --ink-3:#78857F;
+    --rule:#27332C; --rule-strong:#38463E;
+    --field:#7FD6A5; --field-soft:#13251B;
+    --teal:#6FD3DF; --teal-soft:#0F2427;
+    --gold:#E0B84E;
+    --warn:#E88272; --warn-soft:#2E1A19;
+    --ok:#69C495; --ok-soft:#132A1F;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+    color-scheme:dark;
+  }
+
+  *{box-sizing:border-box}
+  html{
+    /* 安卓 Chrome 的"字号自动放大"会把段落字号撑大、把版面顶乱；iOS 横竖屏切换也会重排 */
+    -webkit-text-size-adjust:100%;text-size-adjust:100%;
+  }
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:var(--font-body);font-size:16px;line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;      /* iOS/安卓点按都不闪那个灰块 */
+  }
+  /* 底部留白要避开 iPhone 的手势条与安卓的导航栏 */
+  .shell{max-width:1080px;margin:0 auto;padding-inline:20px;
+    padding-block:0 calc(120px + env(safe-area-inset-bottom,0px))}
+
+  /* ---------- 背景装饰（淡到不影响阅读） ---------- */
+  .bg-deco{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .bg-deco svg{position:absolute;color:var(--field)}
+  .bg-deco .d1{width:340px;height:340px;left:-70px;top:120px;opacity:.07;transform:rotate(-14deg)}
+  .bg-deco .d2{width:420px;height:420px;right:-120px;top:380px;opacity:.06;transform:rotate(12deg)}
+  .bg-deco .d3{width:300px;height:300px;left:-60px;bottom:60px;opacity:.06;transform:rotate(8deg)}
+  .bg-deco .d4{width:260px;height:260px;right:-40px;bottom:-40px;opacity:.07;transform:rotate(-20deg)}
+  @media (max-width:820px){.bg-deco svg{opacity:.045}}
+  .shell,header.top,.bar{position:relative;z-index:1}
+
+  /* ---------- header ---------- */
+  header.top{border-bottom:1px solid var(--rule);background:linear-gradient(180deg,var(--surface) 0%,var(--bg) 100%)}
+  .top-inner{max-width:1080px;margin:0 auto;padding:38px 20px 26px;display:flex;flex-direction:column;gap:14px}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;color:var(--field);text-transform:uppercase}
+  h1{font-family:var(--font-head);font-size:clamp(26px,4.2vw,40px);line-height:1.2;margin:0;font-weight:700;letter-spacing:-.01em}
+  .sub{color:var(--ink-2);max-width:64ch;margin:0;font-size:15.5px}
+  .facts{display:flex;flex-wrap:wrap;margin-top:4px;border:1px solid var(--rule);border-radius:10px;overflow:hidden;background:var(--surface)}
+  .facts div{flex:1 1 120px;padding:11px 15px;border-right:1px solid var(--rule)}
+  .facts div:last-child{border-right:none}
+  .facts b{display:block;font-family:var(--font-head);font-size:19px;line-height:1.3}
+  .facts span{font-size:12px;color:var(--ink-3);letter-spacing:.04em}
+
+  /* ---------- 顶部粘性进度条 ---------- */
+  .bar{position:sticky;top:0;z-index:30;background:var(--surface);background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--rule)}
+  .bar-inner{max-width:1080px;margin:0 auto;padding:9px 20px;
+    padding-top:calc(9px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:13px}
+  .bar .stats{color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .bar .stats b{color:var(--field)}
+  .prog{flex:1 1 160px;min-width:120px;height:7px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+  .prog i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--field),var(--teal));transition:width .3s ease}
+  .bar label.tg{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--ink-2);white-space:nowrap}
+  .bar input[type=checkbox]{accent-color:var(--field);width:15px;height:15px}
+  .bar button{
+    font:inherit;font-size:12.5px;padding:4px 11px;border-radius:99px;cursor:pointer;
+    border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink-2);
+  }
+  .bar button:hover{border-color:var(--field);color:var(--field)}
+
+  /* ---------- 关卡速跳条 ---------- */
+  .lvnav{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
+  .lvnav a{
+    display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:9px 15px;border-radius:99px;
+    border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink-2);
+    text-decoration:none;font-size:13.5px;font-weight:700;white-space:nowrap;line-height:1.2;
+  }
+  .lvnav a:hover{border-color:var(--field);color:var(--field);background:var(--field-soft)}
+  .lvnav a i{font-style:normal;font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--ink-3)}
+  .lvnav a.alldone{border-color:var(--ok);color:var(--ok)}
+  .lvnav a.alldone i{color:var(--ok)}
+  .jumpnote{font-size:13px;color:var(--ink-3);margin:0 0 9px}
+
+  main{padding-top:34px;min-width:0}
+  /* 锚点让位：条高是变的（触屏/窄窗折行后到 134px），由引擎实测写进 --barh */
+  section{margin:0 0 52px;scroll-margin-top:calc(var(--barh,58px) + 8px)}
+  h2{font-family:var(--font-head);font-size:clamp(20px,2.5vw,26px);line-height:1.3;margin:0 0 6px;font-weight:700}
+  h2 .num{display:inline-block;font-family:var(--font-mono);font-size:.6em;color:var(--field);background:var(--field-soft);padding:2px 8px;border-radius:5px;margin-right:10px;vertical-align:2px;font-weight:600}
+  h3{font-size:17px;font-weight:700;margin:28px 0 8px;padding-left:11px;border-left:3px solid var(--field);line-height:1.5}
+  h4{font-size:15px;font-weight:700;margin:20px 0 6px}
+  p{margin:0 0 13px}
+  .lede{color:var(--ink-2);font-size:15.5px;margin-bottom:20px}
+  a{color:var(--field)}
+  code{font-family:var(--font-mono);font-size:.88em;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+  ul,ol{margin:0 0 13px;padding-left:22px}
+  li{margin-bottom:5px}
+  .fx{font-family:var(--font-mono);font-size:.95em;white-space:nowrap}
+  sub,sup{font-size:.72em}
+
+  .card{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:16px 19px;margin:16px 0;box-shadow:var(--shadow)}
+  .card > :last-child{margin-bottom:0}
+  .note,.warn,.tip{border-radius:8px;padding:13px 17px;margin:15px 0;font-size:15px}
+  .note{background:var(--surface-2);border:1px solid var(--rule)}
+  .warn{background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 32%,transparent)}
+  .tip{background:var(--field-soft);border:1px solid color-mix(in srgb,var(--field) 28%,transparent)}
+  .note > :last-child,.warn > :last-child,.tip > :last-child{margin-bottom:0}
+  .note .h,.warn .h,.tip .h{font-size:12px;font-weight:700;letter-spacing:.1em;display:block;margin-bottom:5px}
+  .note .h{color:var(--ink-2)} .warn .h{color:var(--warn)} .tip .h{color:var(--field)}
+  .warn{color:var(--ink)}
+
+  .tablewrap{overflow-x:auto;margin:16px 0;border:1px solid var(--rule);border-radius:10px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;font-size:14.5px}
+  th,td{padding:9px 13px;text-align:left;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-size:12px;letter-spacing:.06em;color:var(--ink-2);font-weight:700;background:var(--surface-2);white-space:nowrap}
+  tbody tr:last-child td{border-bottom:none}
+  td.c{white-space:nowrap}
+
+  /* ---------- 演示台 ---------- */
+  .demo{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:16px 18px 18px;margin:20px 0;box-shadow:var(--shadow)}
+  .demo-h{font-size:15.5px;font-weight:700;margin:0 0 4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .demo-h .pill{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--field);background:var(--field-soft);border-radius:99px;padding:2px 9px}
+  .demo-p{color:var(--ink-2);font-size:14px;margin:0 0 12px}
+  .demo-grid{display:grid;gap:16px}
+  @media (min-width:800px){.demo-grid.two{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:start}}
+  .demo-fig{overflow-x:auto}
+  .demo-fig svg{display:block;max-width:100%;height:auto}
+  .ctrl{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+  .ctrl .row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px}
+  .ctrl .row b{font-family:var(--font-mono);color:var(--field);font-size:15px}
+  input[type=range]{width:100%;accent-color:var(--field);height:22px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .bar button,.chips button,.btn,.qfoot .mini,.opt{touch-action:manipulation}   /* 点按即响应，不触发双击缩放 */
+  .chips button{
+    font:inherit;font-size:12.5px;padding:4px 10px;border-radius:99px;cursor:pointer;
+    border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink-2);
+  }
+  .chips button:hover{border-color:var(--field);color:var(--field);background:var(--field-soft)}
+  .readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(124px,1fr));gap:8px;margin-top:12px}
+  .readout div{background:var(--surface-2);border-radius:8px;padding:8px 11px}
+  .readout span{display:block;font-size:11px;color:var(--ink-3);letter-spacing:.04em}
+  .readout b{font-family:var(--font-mono);font-size:14.5px;font-weight:700}
+  .say{font-size:13.5px;color:var(--ink-2);margin-top:11px;padding-left:11px;border-left:2px solid var(--field)}
+  svg text{fill:currentColor;font-family:var(--font-body);font-size:12px}
+  svg text.s{font-size:11px} svg text.xs{font-size:10px} svg text.b{font-weight:700}
+  svg text.mid{text-anchor:middle} svg text.end{text-anchor:end}
+  svg text.ta{fill:var(--field);font-weight:700} svg text.tt{fill:var(--teal);font-weight:700}
+  svg text.tw{fill:var(--warn);font-weight:700}
+  svg .ln{stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round}
+  svg .thin{stroke:currentColor;fill:none;stroke-width:1;opacity:.5}
+  svg .acc{stroke:var(--field);fill:none;stroke-width:2.4;stroke-linecap:round}
+  svg .acl{stroke:var(--teal);fill:none;stroke-width:2.2;stroke-linecap:round}
+  svg .wrn{stroke:var(--warn);fill:none;stroke-width:2;stroke-linecap:round}
+  svg .dash{stroke-dasharray:5 4}
+  svg .dot{fill:currentColor} svg .accdot{fill:var(--field)} svg .teldot{fill:var(--teal)} svg .wrndot{fill:var(--warn)}
+  svg .mh{fill:currentColor} svg .mha{fill:var(--field)}
+
+  /* ---------- 题目卡片 ---------- */
+  .lvhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:2px}
+  .lvhead .cnt{font-size:12.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+  .qlist{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+  .q{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:15px 18px 16px;box-shadow:var(--shadow)}
+  .q.done{border-color:color-mix(in srgb,var(--rule) 70%,transparent)}
+  /* 题库配置有误的题：标出来、但不参与作答（别让学生对着死按钮发呆） */
+  .q.broken{background:var(--warn-soft);border:1px dashed var(--warn)}
+  .q.broken .qstem{color:var(--warn);margin-bottom:6px}
+  .q.broken .lede{margin:0;font-size:13px}
+  .q.right{border-left:3px solid var(--ok)}
+  .q.wrongq{border-left:3px solid var(--warn)}
+  .qhead{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:7px;font-size:11.5px}
+  .qno{font-family:var(--font-mono);font-weight:700;color:var(--field);background:var(--field-soft);border-radius:99px;padding:2px 9px;letter-spacing:.04em}
+  .qtype{color:var(--ink-3);letter-spacing:.08em}
+  .qmark{margin-left:auto;font-weight:700;font-size:12.5px}
+  .qmark.ok{color:var(--ok)} .qmark.no{color:var(--warn)}
+  .qstem{font-size:15.5px;margin:0 0 12px;line-height:1.72}
+  .qstem .lbl{font-weight:700;color:var(--field);margin-right:4px}
+
+  .opts{display:flex;flex-direction:column;gap:7px}
+  .opt{
+    display:flex;gap:11px;align-items:flex-start;text-align:left;width:100%;
+    font:inherit;font-size:15px;line-height:1.62;color:var(--ink);
+    background:var(--surface);border:1px solid var(--rule);border-radius:9px;
+    padding:9px 13px;cursor:pointer;transition:border-color .13s,background .13s;
+  }
+  .opt:hover:not(:disabled){border-color:var(--field);background:var(--field-soft)}
+  .opt:disabled{cursor:default}
+  .opt .badge{
+    flex:0 0 auto;width:22px;height:22px;border-radius:50%;margin-top:2px;
+    display:grid;place-items:center;font-family:var(--font-mono);font-size:12px;font-weight:700;
+    background:var(--surface-2);color:var(--ink-2);
+  }
+  .opt.picked{border-color:var(--field);background:var(--field-soft)}
+  .opt.picked .badge{background:var(--field);color:#fff}
+  :root[data-theme="dark"] .opt.picked .badge{color:#0E1512}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .opt.picked .badge{color:#0E1512}}
+  .opt.ok{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.ok .badge{background:var(--ok);color:#fff}
+  :root[data-theme="dark"] .opt.ok .badge{color:#0E1512}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .opt.ok .badge{color:#0E1512}}
+  .opt.bad{border-color:var(--warn);background:var(--warn-soft)}
+  .opt.bad .badge{background:var(--warn);color:#fff}
+  .opt .why{display:none}
+  .opt .why.on{display:block;margin-top:5px;font-size:13.5px;color:var(--ink-2);line-height:1.6}
+  .opt.ok .why.on{color:var(--ok)}
+  .opt.bad .why.on{color:var(--warn)}
+
+  .numrow{display:flex;flex-wrap:wrap;align-items:center;gap:9px}
+  .numrow input[type=text]{
+    font:inherit;font-family:var(--font-mono);font-size:16px;width:180px;
+    padding:8px 12px;border-radius:9px;border:1px solid var(--rule-strong);
+    background:var(--surface);color:var(--ink);
+  }
+  .numrow input[type=text]:focus{outline:2px solid var(--field);outline-offset:1px;border-color:var(--field)}
+  .numrow .unit{font-family:var(--font-mono);font-size:14px;color:var(--ink-2)}
+  .btn{
+    font:inherit;font-size:13.5px;padding:6px 14px;border-radius:99px;cursor:pointer;
+    border:1px solid var(--field);background:var(--field);color:#fff;font-weight:500;
+  }
+  /* 注意 :not(.ghost)：:root[data-theme=dark] .btn 的权重是 (0,3,0)，会压过后面的 .btn.ghost (0,2,0)，
+     暗色下 ghost 按钮的文字色被换成深色 → 对比度 1.11，肉眼几乎看不见（踩过） */
+  :root[data-theme="dark"] .btn:not(.ghost){color:#0E1512}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn:not(.ghost){color:#0E1512}}
+  .btn.ghost{background:var(--surface);color:var(--ink-2);border-color:var(--rule-strong)}
+  .btn.ghost:hover{border-color:var(--field);color:var(--field)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+
+  .fb{margin-top:11px;border-radius:9px;padding:10px 13px;font-size:14.5px;display:none}
+  .fb.on{display:block}
+  .fb.ok{background:var(--ok-soft);border:1px solid color-mix(in srgb,var(--ok) 34%,transparent);color:var(--ok);font-weight:700}
+  .fb.no{background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 34%,transparent);color:var(--warn);font-weight:700}
+  .fb .sub{display:block;font-weight:400;color:var(--ink-2);margin-top:4px;font-size:14px}
+
+  .qfoot{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:11px}
+  .qfoot .link{font-size:13px;color:var(--field);text-decoration:none;border-bottom:1px dashed color-mix(in srgb,var(--field) 45%,transparent)}
+  .qfoot .link:hover{border-bottom-style:solid}
+  .qfoot .mini{font:inherit;font-size:12.5px;padding:3px 10px;border-radius:99px;cursor:pointer;border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink-2)}
+  .qfoot .mini:hover{border-color:var(--field);color:var(--field)}
+  .box{margin-top:10px;border-radius:9px;padding:11px 14px;font-size:14.5px;line-height:1.7;display:none}
+  .box.on{display:block}
+  .box.hint{background:var(--teal-soft);border:1px solid color-mix(in srgb,var(--teal) 30%,transparent)}
+  .box.sol{background:var(--surface-2);border:1px solid var(--rule)}
+  .box .h{font-size:11.5px;font-weight:700;letter-spacing:.1em;display:block;margin-bottom:5px}
+  .box.hint .h{color:var(--teal)} .box.sol .h{color:var(--ink-2)}
+  .box > :last-child{margin-bottom:0}
+
+  .grp{border:1px solid var(--rule);border-radius:12px;background:var(--surface);box-shadow:var(--shadow);padding:15px 18px 4px}
+  .grp > .q{box-shadow:none;border:none;border-top:1px dashed var(--rule);border-radius:0;padding:14px 0 12px;margin:0;background:none}
+  .grp > .q:first-of-type{border-top:none}
+
+  .hidden{display:none!important}
+
+  /* ---------- 陪练（只有同目录里真找到图片才出现；没图就完全不占地方） ---------- */
+  .pet{position:fixed;right:14px;bottom:14px;z-index:45;pointer-events:none}
+  .pet.off{display:none}
+  /* 气泡**必须绝对定位**：让它参与文档流的话，气泡文字一长一短就会把形象挤得左右乱跳 */
+  .pet .bubble{
+    position:absolute;right:calc(100% + 9px);bottom:0;
+    /* width:max-content 是必须的：.pet 是 position:fixed、宽度收缩到形象那么宽，
+       绝对定位的气泡在这里算出的可用宽度是负的，会一路掉到 min-content（每行两三个字）。
+       max-height + overflow 是兜底：用户自己写的长台词不许顶出视口还看不见。 */
+    width:230px;                                    /* 老浏览器兜底：不支持 max-content 时也给个确定宽度，别塌成细条 */
+    width:max-content;max-width:230px;
+    max-height:300px;max-height:min(52vh,300px);overflow:auto;
+    pointer-events:auto;background:var(--surface);border:1px solid var(--rule);
+    border-radius:12px 12px 4px 12px;padding:9px 13px;font-size:13.5px;line-height:1.6;color:var(--ink);
+    box-shadow:var(--shadow);opacity:0;transform:translateY(6px);transition:opacity .22s,transform .22s;
+  }
+  .pet .bubble.on{opacity:1;transform:translateY(0)}
+  .pet.flip .bubble{right:auto;left:calc(100% + 9px);border-radius:12px 12px 12px 4px}  /* 贴左边缘时气泡翻到右边 */
+  .pet .fig{display:none}                      /* 默认什么都不显示：等引擎确认形象可用了再说 */
+  .pet .fig.hasimg{
+    display:block;width:calc(76px * var(--petk,1) * var(--petbase,1));height:calc(88px * var(--petk,1) * var(--petbase,1));
+    pointer-events:auto;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;
+    -webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+    border-radius:50%;overflow:hidden;border:2px solid var(--field);background:var(--surface);
+    box-shadow:var(--shadow);animation:bob 4.2s ease-in-out infinite;
+  }
+  .pet .fig.hasimg:active{cursor:grabbing}
+  .pet .fig img{width:100%;height:100%;object-fit:cover;object-position:50% 16%;display:block;-webkit-user-drag:none}
+  /* 内置「大肥鱼」是带透明通道的整身立绘：不套圆形头像框，直接立着；
+     移动/拖动时换成侧面那张，朝右时镜像（侧面原图是朝左的）。 */
+  .pet .fig.kind-fish{
+    width:calc(72px * var(--petk,1) * var(--petbase,1));height:calc(96px * var(--petk,1) * var(--petbase,1));
+    border:none;border-radius:0;background:none;box-shadow:none;overflow:visible;
+    filter:drop-shadow(0 5px 9px rgba(19,26,23,.28));
+  }
+  .pet .fig.kind-fish img{object-fit:contain;object-position:50% 100%}
+  .pet .fig.kind-fish img.fish-side{display:none}
+  .pet .fig.kind-fish.moving img.fish-front{display:none}
+  .pet .fig.kind-fish.moving img.fish-side{display:block}
+  .pet .fig.kind-fish.faceL img{-webkit-transform:scaleX(-1);transform:scaleX(-1)}
+  .pet.dragging .fig{animation:none}           /* 拖动时停掉浮动，否则 getBoundingClientRect 一直在抖 */
+  /* 气泡里的按钮（「换成大肥鱼」「怎么放图」那种） */
+  .pet .bubble button{
+    margin:6px 6px 0 0;padding:5px 10px;font:inherit;font-size:12.5px;cursor:pointer;
+    color:var(--field);background:var(--field-soft);border:1px solid var(--field);border-radius:99px;
+  }
+  .pet .bubble button:hover{background:var(--field);color:var(--surface)}
+  /* 右键（手机上长按）菜单 */
+  .pet .petmenu{
+    display:none;position:absolute;right:0;bottom:calc(100% + 10px);pointer-events:auto;padding:8px;
+    max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px);   /* dvh 兜住 iPad Safari 的"高 100vh" */
+    overflow:auto;overscroll-behavior:contain;
+    background:var(--surface);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow);min-width:196px;
+  }
+  .pet.menuon .petmenu{display:block}
+  /* 用 --ink-2 而不是 --ink-3：11px 的小标题用 ink-3 时对比度只有 3.84(浅)/4.35(暗)，压线 */
+  .petmenu .mt{font-size:11.5px;font-weight:700;letter-spacing:.08em;color:var(--ink-2);margin:4px 4px 4px}
+  .petmenu .mt:first-child{margin-top:0}
+  .petmenu button{
+    display:block;width:100%;margin:0 0 2px;padding:6px 9px;text-align:left;cursor:pointer;
+    font:inherit;font-size:13px;color:var(--ink);background:transparent;border:1px solid transparent;border-radius:8px;
+  }
+  .petmenu button:hover{border-color:var(--field);color:var(--field);background:var(--field-soft)}
+  .petmenu button.on{border-color:var(--field);color:var(--field);background:var(--field-soft);font-weight:700}
+  /* 溜达设置面板（右键菜单 →「溜达设置…」） */
+  .pet .petpanel{
+    display:none;position:absolute;right:0;bottom:calc(100% + 10px);width:286px;max-width:calc(100vw - 28px);
+    pointer-events:auto;                       /* 必须写：pointer-events 会继承，父级 .pet 是 none（漏了这句整块面板点不动） */
+    max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px);   /* dvh 兜住 iPad Safari 的"高 100vh" */
+    overflow:auto;overscroll-behavior:contain;padding:10px 13px 12px;
+    background:var(--surface);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow);
+  }
+  .pet.panelon .petpanel{display:block}
+  .petpanel .pp-h{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:4px}
+  .petpanel .pp-x{border:1px solid transparent;background:transparent;color:var(--ink-3);font-size:16px;line-height:1;
+    padding:1px 7px;border-radius:7px;cursor:pointer}
+  .petpanel .pp-x:hover{border-color:var(--field);color:var(--field);background:var(--field-soft)}
+  .petpanel .pp-row{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--ink-2);margin:8px 0 1px}
+  .petpanel .pp-row b{font-family:var(--font-mono);color:var(--field);font-size:12.5px}
+  .petpanel input[type=range]{width:100%;height:20px;margin:0}
+  .petpanel .chips{margin-top:10px}
+  .petpanel .pp-note{font-size:11.5px;line-height:1.5;color:var(--ink-3);margin:9px 0 0}
+  /* 模式/大小各排一行：菜单矮一半，手机上和"形象靠近视口中部"时就不用滚 */
+  .petmenu .mrow{display:flex;gap:4px;margin:0 0 3px}
+  .petmenu .mrow button{width:auto;flex:1 1 0;text-align:center;white-space:nowrap;margin:0;padding:6px 4px;font-size:12.5px}
+
+  /* ---------- 背景图（同目录放了图片时自动启用；见引擎里的 IMG_CAND） ---------- */
+  .bgimg{
+    position:fixed;top:0;right:0;bottom:0;left:0;z-index:0;pointer-events:none;opacity:0;
+    background-position:50% 28%;background-size:cover;background-repeat:no-repeat;
+    filter:blur(3px) saturate(.95);-webkit-filter:blur(3px) saturate(.95);
+    transform:scale(1.04);-webkit-transform:scale(1.04);
+  }
+  .bgimg.on{opacity:.15}
+  @media (max-width:640px){                      /* 手机的 GPU 弱，模糊半径降下来，画面几乎一样但省电 */
+    .bgimg{filter:blur(2px) saturate(.95);-webkit-filter:blur(2px) saturate(.95);transform:scale(1.03);-webkit-transform:scale(1.03)}
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bgimg.on{opacity:.10}}
+  :root[data-theme="dark"] .bgimg.on{opacity:.10}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  /* 走动时的"走路"动作：小幅度上下 + 左右轻轻摆，跟站着的慢浮动区分开（不动的 bob 是 4.2s 的呼吸感） */
+  @keyframes walk{
+    0%,100%{transform:translateY(0) rotate(0deg)}
+    25%{transform:translateY(-3px) rotate(-2.5deg)}
+    75%{transform:translateY(-3px) rotate(2.5deg)}
+  }
+  /* 权重必须压过 .pet.happy .fig.hasimg（4 个类）——不然"跳一下"那个类粘着的时候，走路动作永远不出现（踩过） */
+  .pet .fig.hasimg.kind-image.moving,
+  .pet .fig.hasimg.kind-fish.moving{animation:walk .46s ease-in-out infinite;animation-duration:var(--walkdur,.46s);
+    transform-origin:50% 90%}
+  .pet.dragging .fig.hasimg.kind-image,
+  .pet.dragging .fig.hasimg.kind-fish{animation:none}   /* 手动拖的时候不摆手，跟随手指更稳 */
+  .pet.happy .fig.hasimg{animation:hop .5s ease-out 2}
+  @keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-12px)}}
+  /* 注意权重：上面 .pet .fig.hasimg 和 .pet.happy .fig.hasimg 都带 animation，
+     所以这条必须写到同样的权重上，否则是死代码（踩过）。 */
+  @media (prefers-reduced-motion:reduce){
+    .pet .fig,.pet .fig.hasimg,.pet .fig.kind-fish,.pet.happy .fig.hasimg,
+    .pet .fig.hasimg.kind-image.moving,.pet .fig.hasimg.kind-fish.moving{animation:none}
+  }
+  @media (max-width:640px){
+    /* 手机上形象整体缩小（菜单里的"大小"仍在此基础上缩放）；右下角让开手势条 */
+    .pet{right:calc(8px + env(safe-area-inset-right,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));--petbase:.76}
+    .pet .bubble{max-width:220px;max-width:min(74vw,220px);font-size:12.5px;max-height:240px;max-height:min(46vh,240px)}
+    .pet .petmenu{bottom:calc(100% + 8px);padding:6px;min-width:126px}
+    .pet .petpanel{width:min(86vw,272px);padding:9px 11px 11px}
+    .petmenu button{padding:5px 8px;font-size:12.5px}
+    .petmenu .mt{margin:2px 3px 3px}
+  }
+
+  /* ---------- 结算 ---------- */
+  .scoregrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .scoregrid div{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px 15px}
+  .scoregrid span{display:block;font-size:11.5px;color:var(--ink-3);letter-spacing:.06em}
+  .scoregrid b{font-family:var(--font-head);font-size:24px;font-weight:700;line-height:1.35}
+  .lvbar{display:flex;flex-direction:column;gap:7px;margin:14px 0}
+  .lvbar .r{display:flex;align-items:center;gap:10px;font-size:13.5px}
+  .lvbar .r .nm{flex:0 0 auto;min-width:126px;color:var(--ink-2)}
+  .lvbar .r .tr{flex:1 1 auto;height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+  .lvbar .r .tr i{display:block;height:100%;width:0;background:var(--field);border-radius:99px;transition:width .3s}
+  .lvbar .r .vl{flex:0 0 auto;font-family:var(--font-mono);font-size:12.5px;color:var(--ink-3);min-width:58px;text-align:right}
+
+  footer{border-top:1px solid var(--rule);margin-top:56px;padding-top:18px;font-size:13.5px;color:var(--ink-3);max-width:76ch}
+  :focus-visible{outline:2px solid var(--field);outline-offset:2px;border-radius:4px}
+
+  /* ---------- 触摸设备（手机 + 平板）----------
+     平板竖屏 744~1024px 走的是桌面布局（640 那个断点管不到），但手指比鼠标粗得多，
+     所以"按下去的东西"要单独放大到 ≈40px 高，滑块拇指也要好抓。pointer:coarse = 主输入是触摸。 */
+  @media (pointer:coarse){
+    .bar button{padding:8px 14px;font-size:13.5px}
+    .chips button{padding:8px 13px;font-size:13px}
+    .qfoot .mini{padding:9px 13px;font-size:13px;min-height:40px}
+    .qfoot{gap:11px}
+    /* ⚠️ 下面两条是补漏的：这三个可点元素以前**没被这条媒体查询覆盖**，
+       实测粗指针下分别是 22.8 / 23.8 / 38.8px —— 都在本块自己写的"≈40px"门槛之下，
+       而它们是手机上最常按的（「只看错题」那个开关、错题卡下方的两个动作）。
+       `.tg` 是个没有内边距的 inline-flex label，所以光靠字号撑不起来。 */
+    .bar label.tg{padding:9px 6px;min-height:40px}
+    /* `.qfoot .link` 原来靠 `border-bottom` 画虚线；直接加内边距会把那条线**推离文字**，
+       看着像给别的元素画的下划线。改用 `text-decoration`，线跟着文字走。 */
+    .qfoot .link{padding:9px 4px;min-height:40px;display:inline-flex;align-items:center;
+      border-bottom:none;text-decoration:underline dashed;text-underline-offset:3px}
+    input[type=range]{height:28px}
+    .btn{padding:11px 20px;font-size:15px}
+    .petmenu button{padding:11px 11px;font-size:13.5px;line-height:1.35}
+    .petmenu .mrow button{padding:11px 4px;font-size:13px}
+    .petmenu .mt{margin:6px 4px 5px}
+    .petmenu .mrow{gap:6px}
+    .pet .petmenu{min-width:210px}
+    .petpanel .pp-x{padding:8px 12px;font-size:19px;min-width:40px;min-height:40px}
+    .petpanel .pp-row{margin:11px 0 3px;font-size:13px}
+    .petpanel input[type=range]{height:30px}
+  }
+  /* 触屏上不要"粘住"hover 样式（iOS 点一下会留着 hover 态） */
+  @media (hover:none){
+    .opt:hover:not(:disabled),.chips button:hover,.bar button:hover,.petmenu button:hover,
+    .lvnav a:hover,.btn.ghost:hover,.qfoot .link:hover,.qfoot .mini:hover,
+    .pet .bubble button:hover,.petpanel .pp-x:hover{border-color:var(--rule-strong);background:inherit;color:inherit}
+  }
+  /* ⚠️ 上面这两条"触摸设备"的媒体查询必须留在样式表**最末**：
+     它们要覆盖 .petmenu button / .petpanel input 这些在中段定义过的东西，
+     同权重时靠"后出现者胜"，放前面就会被盖掉（踩过：触摸下菜单项只剩 31px）。 */
+</style>
+<style>
+  /* 讲练一体页的合并层：题区、计数、吸顶条让位 */
+  .qsec{margin-top:56px}
+  .cnt{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--ink-3);margin-left:10px;vertical-align:2px}
+  .bar{top:0}
+  section{scroll-margin-top:calc(var(--barh,58px) + 8px)}
+</style>
+</head>
+<body>
+
+<noscript><p style="margin:0;padding:14px 18px;background:var(--warn-soft);color:var(--warn)">
+这个页面需要 JavaScript：题目、判分与演示都是现场生成的。请用 Safari / Chrome 等浏览器打开，别用系统文件预览。</p></noscript>
+
+<div class="bgimg" id="bgimg" aria-hidden="true"></div>
+
+<!-- 陪练：只有同目录里真的找到图片时才出现（图片名在引擎的 PAGE.petImages 里配）。
+     ⚠️ 这一块必须排在引擎脚本之前；整块不要也行，引擎会静默跳过。 -->
+<div class="pet" id="pet" aria-live="polite">
+  <div class="bubble" id="petBubble"></div>
+  <div class="fig" id="petFig" role="img" aria-label="陪练"></div>
+</div>
+
+<header class="top"><div class="top-inner">
+  <span class="eyebrow">大学物理学 · 第 XX 章 · 讲练一体</span>
+  <h1>（章标题）</h1>
+  <p class="sub">上面讲解、下面就是题；每个小节讲完紧跟着这一节的练习。</p>
+  <div class="facts">
+    <div><b>N</b><span>个作答点</span></div>
+  </div>
+</div></header>
+
+<div class="bar">
+  <div class="bar-inner">
+    <span class="stats">已作答 <b id="s-done">0</b>/<span id="s-total">0</span> · 正确率 <b id="s-rate">—</b> · 错题 <b id="s-wrong">0</b></span>
+    <span class="prog" aria-hidden="true"><i id="s-fill"></i></span>
+    <label class="tg"><input type="checkbox" id="onlyWrong"> 只看错题</label>
+    <button id="petToggle" type="button">🌿 陪练：开</button>
+    <button id="resetAll" type="button">清空重来</button>
+  </div>
+</div>
+
+<div class="shell">
+<main>
+
+  <!-- 讲：知识块写在这里（从《拆解手册》整节搬过来即可） -->
+  <section id="guide-anchor">
+    <h2><span class="num">XX.1</span>（小节标题）</h2>
+    <p class="lede">（这一节的正文……）</p>
+  </section>
+
+  <!-- 练：紧跟在这一节后面 -->
+  <section class="qsec" id="p-l0">
+    <h2><span class="num">练</span>练一练 · 本节 <span class="cnt" data-cnt="0"></span></h2>
+    <p class="lede">刚看完就做，趁热。点选项/填数值立刻判分，错了会逐项告诉你错在哪。</p>
+    <div class="qlist" data-lv="0"></div>
+  </section>
+
+  <section id="result">
+    <h2><span class="num">✓</span>你现在到哪儿了</h2>
+    <div class="scoregrid">
+      <div><span>已作答</span><b id="r-done">0</b></div>
+      <div><span>正确率</span><b id="r-rate">—</b></div>
+      <div><span>错题待办</span><b id="r-wrong">0</b></div>
+      <div><span>整体评价</span><b id="r-verdict" style="font-size:17px">还没开始呢</b></div>
+    </div>
+    <div class="lvbar" id="r-bars"></div>
+    <div class="card" id="r-advice">
+      <h4>接下来做什么</h4>
+      <p style="margin-bottom:0" id="r-advicetext">先随便做一题试试手。做错了会当场告诉你为什么。</p>
+    </div>
+    <div class="qfoot" style="margin-top:14px">
+      <button class="btn" type="button" id="goWrong">把我做错的题挑出来</button>
+      <button class="btn ghost" type="button" id="goAll">看全部题目</button>
+    </div>
+  </section>
+
+  <footer><p style="margin-bottom:0">骨架示例：样式与引擎已就位，换成这一章的正文与题库即可。右下角那个陪练要<b>同目录有图片</b>（pet.png 等）才出现，也可以右键把它切成内置的大肥鱼；两个都没有就什么都不显示。</p></footer>
+</main>
+</div>
+
+<script data-bank id="bank0" type="application/json">[
+  {"id":"s-1","type":"single","lv":0,
+   "stem":"（示例单选题）这一章最后要用来判断「磁场强不强」的量是哪个？",
+   "opts":[
+     {"t":"B（磁感应强度）","ok":true,"why":"对。决定受力与强弱的是 B。"},
+     {"t":"H（磁场强度）","ok":false,"why":"名字骗人——H 只是为了好算而引入的辅助量。"}
+   ],
+   "hint":"想想谁出现在 F = qv×B 里。",
+   "ref":{"h":"#guide-anchor","t":"回手册 · 对应小节"}},
+
+  {"id":"s-2","type":"num","lv":0,"unit":"A/m","ans":200,"tol":3,
+   "stem":"（示例填数题）螺线管 n = 2000 匝/m，电流 I = 0.10 A，求管内 H。",
+   "hint":"H = nI —— 这一步与介质无关。",
+   "sol":"H = nI = 2000 × 0.10 = 200 A/m。"}
+]</script>
+
+<script id="engine">
+(function(){
+  'use strict';
+  /* 最常见的"手误"是把整段引擎 script 标签复制一份：会渲染双份题卡、双份定时器与监听、
+     重复的 DOM id，而顶部数字仍按第一份算 —— 纯静默。第二份直接退出。 */
+  if(window.__ISG_ENGINE__){ try{ console.warn('本页加载了两份引擎脚本，第二份已忽略'); }catch(e){} return; }
+  window.__ISG_ENGINE__=1;
+
+  /* ---------------- 存储 ---------------- */
+  /* ---------------- 页面配置：换章只改这一小块 ----------------
+     引擎其余部分都从页面与题库里自己推导，不需要动。 */
+  var PAGE={
+    key:'chXX-study-guide-v1',               /* 存盘用的键，**每章换一个**（不换的话各章的作答记录会串） */
+    finalAdvice:'',                          /* 全部关卡都达标时说的话；留空用默认 */
+    /* 陪练形象与全页背景：图片要放在 HTML 的**同一目录**，按下面顺序试，命中第一张就用它。
+       一张都没找到 → 右下角不出现任何陪练元素（顶部开关会变成「没放图」，点一下教用户怎么放）。
+       换章不想带图就把数组留空。**别把某一章的文件名写死在这**，engine 里出现的名字对所有章通用。 */
+    /* 「自己溜达」的节奏：用户停手 idleMs 毫秒后开始溜达，之后每 tickMs 毫秒看一眼要不要再走一段。
+       默认 4s / 3s（太懒了会让人以为坏了，太勤了会烦）。想让它安静点就把两个数都调大。 */
+    petRoamIdle:4000,
+    petRoamTick:3000,
+    /* 走路速度（像素/秒）：溜达用慢的，跟随鼠标用快的。想让陪练更活泼就调大。 */
+    petWalkSpeed:120,
+    petFollowSpeed:1100,          /* 跟随的"基础速度"（px/秒）：比一般鼠标移动快，所以能贴着光标走 */
+    petFollowMaxSpeed:2400,       /* 跟随的封顶速度：距离远时按增益加速，但不许快到像瞬移 */
+    petImages:['pet.png','pet.jpg','pet.jpeg','pet.webp',
+               'venti.png','venti.jpg','venti.jpeg','venti.webp'],
+    bgImages:['pet-bg.png','pet-bg.jpg','pet-bg.webp']   /* 留空则直接拿头像那张铺背景 */
+  };
+  var KEY=PAGE.key;
+  var store={pts:{},ui:{}};
+  try{
+    var raw=JSON.parse(localStorage.getItem(KEY)||'{}');
+    if(raw&&typeof raw==='object'){ store.pts=raw.pts||{}; store.ui=raw.ui||{}; }
+  }catch(e){}
+  /* 陪练偏好：默认开着、原地不动、原大小、位置在右下角、形象优先用同目录的图片 */
+  if(store.ui.pet!==false) store.ui.pet=true;
+  /* 存盘可能被手改、被别的工具写坏、或以后自己改过字段名 —— 读进来就校验，
+     否则 pos 变 NaN 会让补间永远到不了站（还留下一条永不停止的 16ms 定时器链），
+     petSize 写坏会让形象静默变成 0×0 或铺满整页把点击全挡住。 */
+  store.ui.petSize=(typeof store.ui.petSize==='number'&&isFinite(store.ui.petSize))
+    ? Math.min(1.6,Math.max(0.6,store.ui.petSize)) : 1;
+  var pp0=store.ui.petPos;
+  store.ui.petPos=(pp0&&isFinite(+pp0.r)&&isFinite(+pp0.b))?{r:+pp0.r,b:+pp0.b}:null;
+  if(!store.ui.petMode) store.ui.petMode='stay';
+  if(typeof store.ui.petSize!=='number') store.ui.petSize=1;
+  if(!store.ui.petPos) store.ui.petPos=null;
+  if(store.ui.petArt!=='fish') store.ui.petArt='image';   /* image=同目录的图片；fish=内置大肥鱼 */
+  /* 这个环境存不存得住？有些"HTML 查看器"App、隐私模式会直接抛错。
+     探一次就够；不能存就在顶栏写清楚，免得用户以为进度存上了、下次打开却全没了。 */
+  var storageOK=(function(){
+    try{ localStorage.setItem(KEY+'__probe','1'); localStorage.removeItem(KEY+'__probe'); return true; }
+    catch(e){ return false; }
+  })();
+  function noteNoSave(){
+    try{
+      if(!document.getElementById('s-nosave')){
+        var host=document.querySelector('.bar .stats')||document.querySelector('.bar-inner');
+        if(host){
+          var sp=document.createElement('span');
+          sp.id='s-nosave';
+          sp.style.cssText='color:var(--warn);font-weight:700';
+          sp.textContent=' · 进度无法保存（这个环境不允许本地存储）';
+          host.appendChild(sp);
+        }
+      }
+    }catch(e){}
+  }
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(store)); }catch(e){ noteNoSave(); } }
+
+  /* ---------------- 题库 ---------------- */
+  var BANK=[];
+  Array.prototype.forEach.call(document.querySelectorAll('script[data-bank]'),function(s){
+    /* 这里必须打上"已读过"的标记：DOMContentLoaded 时的 scanNewBanks() 靠它跳过已处理的段。
+       少了这一行，题库会被**整份渲染两遍**——页面上题卡翻倍、顶部总数翻倍（2 道题显示 0/4），
+       而探针查不出来：它插在 ⟨/body⟩ 前、赶在 DOMContentLoaded 之前执行，那一刻只有一份。
+       骨架页自己就中过这个招，只有截图才看得出来。 */
+    s.__isgSeen=1;
+    try{ BANK=BANK.concat(JSON.parse(s.textContent)); }
+    catch(e){ console.error('题库解析失败：',s.id,e); }
+  });
+
+  /* 时间基准用单调时钟：有的 WebView 省电模式会把 Date.now 冻住，
+     那时 `Date.now()-lastAct` 恒为 0 → 溜达永不启动、朝向迟滞永不翻面（都是静默的）。 */
+  var NOW=(window.performance&&window.performance.now)?function(){ return window.performance.now(); }:function(){ return Date.now(); };
+
+  /* ---------------- 工具 ---------------- */
+  function el(tag,cls,html){ var d=document.createElement(tag); if(cls)d.className=cls; if(html!=null)d.innerHTML=html; return d; }
+  /* 页面缺某个 #id 时：只警告一次并跳过那项功能。
+     以前 paintProgress/paintResult 直接 getElementById(...).textContent=… ，
+     缺一个 #s-rate 就每答一题抛一次错，连带把后面的（陪练说话、只看错题、筛选）全废掉。 */
+  var WARNED={};
+  function req(id){
+    var e=document.getElementById(id);
+    if(!e&&!WARNED[id]){ WARNED[id]=1; try{ console.warn('页面上缺少 #'+id+'，相关显示已跳过'); }catch(x){} }
+    return e;
+  }
+  function setText(id,v){ var e=req(id); if(e) e.textContent=v; }
+  function setHTML(id,v){ var e=req(id); if(v!=null){ var e2=req(id); if(e2) e2.innerHTML=v; } }
+  var SUP={'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9','⁻':'-','⁺':'+'};
+  /* 把中文/全角/印刷体字符换成 ASCII。**不要"删掉不认识的字符"**——删字符会静默改数：
+     全角减号 U+FF0D 被删 → 「−5」变成 5（错的判对）；全角句号被删 → 「1．5」变成 15（也判对）。
+     中文输入法切全角（Shift+空格）就能打出这些字符，学生不用刻意就能踩到。 */
+  var NUM_MAP={
+    '０':'0','１':'1','２':'2','３':'3','４':'4','５':'5','６':'6','７':'7','８':'8','９':'9',
+    '．':'.','。':'.','，':',','、':',',
+    '－':'-','−':'-','–':'-','—':'-','―':'-','‒':'-','ー':'-',
+    '＋':'+','﹢':'+',
+    '·':'x','⋅':'x','∙':'x','・':'x',
+    '　':' ','\u00a0':' ','\u2007':' ','\u202f':' ','\u3000':' '
+  };
+  function normNum(t){
+    var out='',i,c;
+    for(i=0;i<t.length;i++){ c=t.charAt(i); out+=(NUM_MAP[c]!==undefined?NUM_MAP[c]:c); }
+    return out;
+  }
+  function parseNum(s){
+    if(s==null) return NaN;
+    var t=normNum(String(s)).trim();
+    /* ① 上标/中文写法的科学计数法：×10⁻⁴、*10^4、x10-4 都算 */
+    t=t.replace(/[×xX*]\s*10\s*([-+]?[⁻⁰¹²³⁴⁵⁶⁷⁸⁹0-9]+)/g,function(m,d){
+      return 'e'+d.split('').map(function(c){return SUP[c]||c;}).join('');
+    });
+    t=t.replace(/\^/g,'').replace(/[×xX*]\s*10\s*/g,'e');
+    /* 光秃秃的指数尾巴（1e、0x10→"0e"）不算数：它会被 parseFloat 截成 1 / 0，静默判对 */
+    if(/\d[eE][-+]?$/.test(t)) return NaN;
+    /* ② 逗号：可能是小数点(1,06)也可能是千分位(1,234,567)。一律删掉会把 1,06 变成 106。 */
+    if(/^[-+]?\d{1,3}([,]\d{3})+$/.test(t.replace(/\s/g,''))) t=t.replace(/[,]/g,'');
+    else if(/^[-+]?\d+[,]\d{1,2}$/.test(t.replace(/\s/g,''))) t=t.replace(/,/,'.');
+    else t=t.replace(/[,]/g,'');
+    /* 空格当千分位：只认"1 000 000"这种规整写法，别把"5 3"当成 53 */
+    if(/^[-+]?\d{1,3}(\s\d{3})+$/.test(t)) t=t.replace(/\s/g,'');
+    /* ③ 严格校验：整串必须是"一个数 + 可选的不含量值的尾巴"。
+       不允许算术表达式（5-3 会被 parseFloat 截成 5 → 该错判对）、不允许多余数字（5 T=9 会被拼成 59）。
+       尾巴里出现数字或运算符就直接判为"看不懂"，返回 NaN 由反馈层告诉学生换个写法。 */
+    var m=t.match(/^\s*([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)\s*(.*)$/);
+    if(!m) return NaN;
+    if(/[eE]$/.test(m[1])) return NaN;          /* 光秃秃的指数尾巴（1e、0e）不算数 */
+    var rest=m[2];
+    if(/[0-9]/.test(rest)) return NaN;          /* 后面还有数字：算式或多余内容 */
+    if(/^[+\-*/=]/.test(rest)) return NaN;      /* 尾巴以运算符开头：5+、5-3 这类 */
+    /* 注意：单位里的斜杠要放行（A/m、m/s、N/C 都是正常单位），所以只拦"开头是运算符" */
+    var v=parseFloat(m[1]);
+    return isFinite(v)?v:NaN;
+  }
+  /* 显示用的小数位要按量级给足：**页面公布的"正确答案"必须落进默认容差里**，
+     否则学生照抄提示里的答案还是判错，会陷入死循环（|ans| 在 0.001~0.025 时必然发生）。 */
+  function fmt(v){
+    if(!isFinite(v)) return '—';
+    var a=Math.abs(v);
+    if(a===0) return '0';
+    if(a>=1e5||a<1e-3){
+      var e=Math.floor(Math.log10(a));
+      var m=v/Math.pow(10,e);
+      return (Math.round(m*100)/100)+'e'+e;
+    }
+    var dec = a>=100?0 : (a>=10?1 : (a>=1?2 : Math.min(6,Math.ceil(-Math.log10(a))+3)));
+    var p=Math.pow(10,dec);
+    return String(Math.round(v*p)/p);
+  }
+
+  /* ---------------- 进度统计 ---------------- */
+  var PTS=[];   /* {id, lv, get ok} */
+  function stats(){
+    var done=0,right=0,wrong=0,byLv={};
+    PTS.forEach(function(p){
+      var st=store.pts[p.id];
+      byLv[p.lv]=byLv[p.lv]||{d:0,r:0,n:0};
+      byLv[p.lv].n++;
+      if(st&&st.answered){
+        done++; byLv[p.lv].d++;
+        if(st.ok){ right++; byLv[p.lv].r++; } else { wrong++; }
+      }
+    });
+    return {done:done,right:right,wrong:wrong,total:PTS.length,byLv:byLv};
+  }
+  function paintProgress(){
+    var s=stats();
+    setText('s-done',s.done);
+    setText('s-total',s.total);
+    setText('s-rate',s.done?Math.round(s.right/s.done*100)+'%':'—');
+    setText('s-wrong',s.wrong);
+    var fillEl=req('s-fill'); if(fillEl) fillEl.style.width=(s.total?s.done/s.total*100:0)+'%';
+    Array.prototype.forEach.call(document.querySelectorAll('.cnt[data-cnt]'),function(n){
+      var lv=n.getAttribute('data-cnt'), b=s.byLv[lv];
+      n.textContent=b?(b.d+'/'+b.n+' 已答'):'';
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.lvnav i[data-nav]'),function(n){
+      var lv=n.getAttribute('data-nav'), b=s.byLv[lv];
+      n.textContent=b?(b.d+'/'+b.n):'';
+      var a=n.parentNode;
+      if(a&&a.classList) a.classList.toggle('alldone',!!(b&&b.d===b.n&&b.n>0));
+    });
+    paintResult(s);
+  }
+  /* 关卡名：优先用题区上的 data-name，其次用题区标题（去掉计数与「练」徽标），都没有就「第 n 关」 */
+  function levelName(lv){
+    var host=document.querySelector('.qlist[data-lv="'+lv+'"]');
+    if(host){
+      var sec=host.parentNode;
+      while(sec&&sec!==document&&!(sec.classList&&sec.classList.contains('qsec'))){ sec=sec.parentNode; }
+      if(sec&&sec!==document){
+        var dn=sec.getAttribute&&sec.getAttribute('data-name');
+        if(dn) return dn;
+        var h2=sec.querySelector('h2');
+        if(h2){
+          var t=h2.textContent.replace(/[0-9]+\s*\/\s*[0-9]+\s*已答/g,'')      /* 去掉「3/5 已答」 */
+                               .replace(/[（(]\s*[）)]/g,'')                     /* 去掉计数被拿走后剩下的空括号 */
+                               .split(' ').join(' ').trim();
+          /* 只在标题真的是以「练」徽标开头时才剥掉那个「练」——
+             无差别地剥掉开头的「练」会把「练一练 · …」吃成「一练 · …」 */
+          var badge=h2.querySelector&&h2.querySelector('.num');
+          if(badge&&/^\s*练/.test(badge.textContent||'')) t=t.replace(/^练\s*/,'');
+          if(t) return 'L'+lv+' '+t;
+        }
+      }
+    }
+    return '第 '+lv+' 关';
+  }
+  function paintResult(s){
+    setText('r-done',s.done+' / '+s.total);
+    setText('r-rate',s.done?Math.round(s.right/s.done*100)+'%':'—');
+    setText('r-wrong',s.wrong);
+    var rate=s.done?s.right/s.done:0;
+    var v='还没开始呢';
+    if(s.done){
+      if(s.done<5) v=rate>=.6?'开局不错':'慢慢来';
+      else if(rate>=.9) v='稳了，去考试吧';
+      else if(rate>=.75) v='基础扎实';
+      else if(rate>=.55) v='还有几个坑要填';
+      else v='得回去看手册了';
+    }
+    setText('r-verdict',v);
+
+    var bars=req('r-bars'); if(bars) bars.innerHTML='';
+    Object.keys(s.byLv).forEach(function(k){          /* 关卡从页面/题库自己推导，不用写死 */
+      var b=s.byLv[k]||{d:0,r:0,n:0};
+      var r=el('div','r');
+      r.appendChild(el('span','nm',levelName(k)));
+      var tr=el('span','tr'); var i=el('i');
+      i.style.width=(b.n?b.d/b.n*100:0)+'%';          /* 条 = 这一关的进度（已答/总数） */
+      if(b.d && b.r/b.d<0.6) i.style.background='var(--warn)';
+      tr.appendChild(i); r.appendChild(tr);
+      r.appendChild(el('span','vl',(b.d?b.r+'/'+b.d:'—')+' 对'));   /* 数字 = 正确率（对/已答） */
+      if(bars) bars.appendChild(r);
+    });
+
+    /* 「每关都达标」必须真的每关都达标：已答够（≥3 或该关全部）且正确率 ≥70%。
+       原来只判"弱关列表为空"，而弱关要求 d>=3 —— 于是答 1 题就算"各关都在 70% 以上"，
+       极端情形下（每关各错一题）同一屏里评级说"得回去看手册了"、建议却说"很好"。 */
+    var weak=[], allOk=true, anyDone=false;
+    Object.keys(s.byLv).forEach(function(lv){
+      var b=s.byLv[lv]; if(!b||!b.n) return;
+      if(b.d) anyDone=true;
+      var enough=(b.d>=3||b.d===b.n);
+      if(!enough||b.r/b.d<0.7){ allOk=false; }
+      if(b.d>=3&&b.r/b.d<0.7) weak.push(lv);
+    });
+    var adv='先随便做一题试试手。做错了会当场告诉你为什么。';
+    if(s.done&&weak.length){
+      adv='正确率偏低的是：<strong>'+weak.map(levelName).join('、')+'</strong>。建议翻回去把对应小节重读一遍，再回来把这些题重做（点卡片里的「重做本题」）。';
+    }else if(s.done&&allOk&&anyDone){
+      adv=PAGE.finalAdvice||'各关都在 70% 以上了，很好。把「错题」再过一遍，然后翻回对应的讲解小节重看一遍关键公式——套路你已经有底子了。';
+    }else if(s.done){
+      adv='还没到"各关都达标"：把所有关卡的题都做到 70% 以上（每关至少做 3 题，或把这一关做完），建议里会自动更新。';
+    }
+    setHTML('r-advicetext',adv);
+  }
+
+  /* ---------------- 陪练（有形象才出现）+ 全页背景 ----------------
+     形象只有两个来源，二选一（右键菜单里随时切）：
+       · image（默认）—— 同目录里找得到图片就用图片（用户自己放的）；
+       · fish        —— 用引擎内置的「大肥鱼」（下面 FISH 里嵌好的 data URI，不依赖任何外部文件）；
+     两个都没有 → 右下角**什么都不出现**（引擎不自带任何内置的旧式小人），顶部开关显示「没放图」，
+     点一下会给出两条路：换成内置大肥鱼 / 教用户怎么放自己的图。
+     交互：按住拖走（位置存进 localStorage）· 单击跳一下并说话 · 双击换模式 · 右键 / 手机上长按开菜单。 */
+  var petEl=document.getElementById('pet'), bubble=document.getElementById('petBubble'),
+      fig=document.getElementById('petFig'), toggle=document.getElementById('petToggle');
+  var HAS_PET=!!(petEl&&bubble&&fig);        /* 页面可以整块不要陪练：引擎静默跳过，不报错 */
+  /* 「自己溜达」的节奏（可在 PAGE 里改）：停手多久开始溜达 / 每隔多久看一次 */
+  /* 溜达参数：出厂默认来自 PAGE，用户在界面上改过的存进 localStorage（每页各自的存盘键） */
+  var WSPEED=Math.max(20,PAGE.petWalkSpeed||120);
+  /* 跟随速度 = 基础 + 距离增益，封顶。这样"光标匀速走"时形象完全咬得住（稳态滞后≈0），
+     而"大幅跳一下"时是快速滑行而不是瞬移。 */
+  var FMAX=Math.max(200,PAGE.petFollowMaxSpeed||2400);
+  /* 封顶只约束"距离增益"那一部分：用户自己在面板里把速度调到比封顶还高时，
+     就以用户的值为准（不然他会觉得"拖了没反应"）。 */
+  function followSpeed(d){ return Math.min(Math.max(FMAX,FOLLOW.speed), FOLLOW.speed + d*4); }
+  var ROAM_DEF={ speed:WSPEED, reach:185, tick:Math.max(500,PAGE.petRoamTick||3000), idle:Math.max(1000,PAGE.petRoamIdle||4000) };
+  var FOLLOW_DEF=Math.max(200,PAGE.petFollowSpeed||1100);
+  var FOLLOW={ speed:FOLLOW_DEF };            /* 用户在面板里改过的跟随速度 */
+  var ROAM={};
+  function roamLoad(){
+    var u=store.ui.petRoam||{};
+    ROAM={
+      speed:Math.max(20,+u.speed||ROAM_DEF.speed),
+      reach:Math.max(40,+u.reach||ROAM_DEF.reach),
+      tick:Math.max(500,+u.tick||ROAM_DEF.tick),
+      idle:Math.max(1000,+u.idle||ROAM_DEF.idle)
+    };
+  }
+  function followLoad(){ FOLLOW.speed=Math.max(200,+((store.ui.petFollow||{}).speed)||FOLLOW_DEF); }
+  roamLoad(); followLoad();
+  var roamTimer=0;
+  function startRoamTimer(){ if(roamTimer) clearInterval(roamTimer); roamTimer=setInterval(roamTick,ROAM.tick); }
+  /* 内置「大肥鱼」形象：素材来自 1190fasheqi/dafeiyu-pet（MIT），
+     原图与许可见 third-party/dafeiyu-pet/，这里嵌成 data URI 所以页面不用带图文件。
+     front 空串 = 不提供「大肥鱼」这个选项；side 留空则移动时不侧身。
+
+     ⚠️ 下面这段许可原文是**故意内联在这里**的，不要删、也不要挪进别的文件：
+     引擎会被整段复制进**每一张生成的页面**，而页面里嵌着这份美术的 base64 ——
+     也就是说每一份交付物都含该素材的副本。MIT 要求「许可原文随所有副本一起分发」，
+     只写一句"许可见 third-party/…"是不够的：那个目录**不跟着页面走**。
+     （实测：改动前生成的页面里含出处指引与美术 base64，但 `Permission is hereby granted`
+      出现 0 次 —— 出处有了、许可原文没有。）
+
+     出处与许可（沿用上游 LICENSE 原文；上游本身没有署名版权人，只有年份，故照录）：
+       dafeiyu-pet — MIT License — Copyright (c) 2026
+       https://github.com/1190fasheqi/dafeiyu-pet
+
+       Permission is hereby granted, free of charge, to any person obtaining a copy
+       of this software and associated documentation files (the "Software"), to deal
+       in the Software without restriction, including without limitation the rights
+       to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+       copies of the Software, and to permit persons to whom the Software is
+       furnished to do so, subject to the following conditions:
+
+       The above copyright notice and this permission notice shall be included in
+       all copies or substantial portions of the Software.
+
+       THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+       IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+       FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+       AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+       LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+       OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+       THE SOFTWARE.
+
+     这套美术本身是同人二创（上游自述「DeepSeek V4 Pro 二创形象『鲸鱼娘·大肥鱼』」），
+     MIT 只约束作者有权许可的那部分。不想要这个风险：把 FISH 两个串置空即可 ——
+     引擎届时不再提供「大肥鱼」这个选项，其余功能照常。 */
+  var FISH={
+    front:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIwAAAC7CAMAAACAYYYZAAADAFBMVEViX2BfXm9ZV2InHx9nY1kkJEgsM29/f4ggHSYkHyRlaoI+OUM4ODhoP0BmPz0+gs9MWpwAAABXZqVUYZ379vVOWpcwN2zy6utqdrElKVEWGDFviMYxNVPQx9M5R4l2lM85Q3UoJjMHBQ5ibKbs2NCFlcwcIkxvZ3Dk2uVZdLNMR1Fxg7kXHEf+/v1HSW5HW6TY1uZCTYitp67a09dXVW3Gus4mLWPz49uOh40LDCgpJy2Ld3QXFBq5tLbWxrlYVFqZlZeOpdZ2pdZ4dHlaeMe2ts1kW2vMubOYlqkrKCtoWFWqmJMdITmlnK4hHSexq8d2doo2MzmDjMRoaI89UZQ5NjhLNjdkfMSKiK7OzONYVFVDO0dKR0mEfIVLSEkcGyizx+ctKS02MzXMpovd4vF3puOWg3gyPoKLiIk5NTdZhcdmZGRHREnNqqQZFxynh3Hr6OjqxrnY2NhLasTHxsZagrd4dnVKSFFqZ2joyMOJtumHqOMuFhhoSklpZ2uHbGflurKs0/jJyMupp6imi4UpCQh2YlfXtI0hHSQtKS6XlZXU09K3trW3tbWKiIokKE11c3g6QFiYxvTLmJW2oo+pp6S4lXc7U3I0MTl2nOE4W6lRQT0eKmaLstpTUlhGKClZV1nnvZHn0bWdpLmopJqGhHpqkr1iXWI7Za7s5tqDfXqYl5UaGB0cGyC6wtmkpKVaV1dkXlaCaFhAPUWYlpE3NjanpqRCPDlAPDxdW2JGGhfqwpZbW2CGXFhgXFt9g5EgHCKamJc6O0xSdZa7urs0NU2ioZ87OkE9OkF8s+RmQD1XZnv9/PhfXWNCPkNwUzVDPUJJQT+Ef4RISEi24/9jXWMcIUUvKyUnJyfGmqNxcXNcWlxiX4Nval7h4ePg3tzh397gvMLf79/U1L/GxMLAv7/Bt63es3nAr87Jo3/En32/ycmgseSiopujmqOhdWkfPXsfHx+boqKZmaEZFhmYlZOIhYaLi4uOin2Af4IZHUSBfn6If2aVel7/7bxzdpZmAm91AAABAHRSTlNcrcTiEAfVHJ1we24J////oQD+/v7+/v7+/v7+/v7+/v77/v7+/v7+/v7+/v4L/v7+/v7+/v7+/v7+zv/4/v7+/v7//v7+//7+sP////74/v7///7/jv/+//5Q/3D/U9T+kKj//v///ypz/0qH/tP/Dv8S/zT/NKoz/v/8//+M//7/FlD/////13EpIxVHbNCB/////xz//8L+/////6f/l//+/hgk/0n+ESpasa/+JGk5/7gaT2ltklD//zH/Sf+2aLj/O8hWmlf///9cl03/eFQtB/8y1zEG/00w/ywwIxj/EAxGSBn/////GP8kHP//CCQecISFH0922Xge//9kHUNqKAAALJpJREFUeNrFnQdgG8eZ73Xl9cptwAx2gV0AxAILYIlOgAAJUhR7F6lK9WZ1Wbbl3rsdl9hO7CROTy651EvP9d57v3vv7l7vvff37v2/2V0USpYtx1bWEimCAPaHb7752nwz3jZww1f+9IFjI5bFLOsDv/1/Bt7Ja9uNvuA/HRixmG4WVVUtmpp7Pv9dg8nffWzZ0sRlqlI4Ozgo/8I3vkswnz9mMZPxkbsefO97f+Nnf0EeHMxGzJHPfTdg8rssTVJfvOuxW72f73jvz6qSOsR2fRdgnh1ZVKUXv/58z0PvuevFITVqffqmw5zjulQ8/MKWRx98cWiI7b/ZMF/hmqQdfv6qxz+Kh8/cZJj9VlHSRt5z9S9uG5E0T2ny4roJMJ+31IQ5ctu1fvWgaQLm0V/+y4cvtg4f/uln7s6/yzD5ES2hjvyDa/7ued18Jn+0tTk5Xhotlerttaf/Wv5dhTmgS9LhO3rg7njhwbtwPfjzAwO36toXRpyZkKIo6XQopITGN5/en3/3YB4lhXlvd0I/OLJmj4+WjdLBkQdf+IDF45tK2jCMqhFKhwxAjVu78u8azH4mqb/gW7qBWx+8OD8DCSghEoNlTeoVuxQyCiSWEGgKeLhs7XrXYHYxiQUG5uefbpd9OaRDadw5pBvKPgMoCl3ASaeNUNnaP/B77w7MMU160XdAj7VGFcUwymUSC/4UlHpdKVR9EvFVKaeryvjcuyYZTb3Ld0dPl5WyYYgh8e9f9ShCIQ+PfjLK6Xr8rnP5gRu1O29NZ4o+zHsnlbKP4ekMUAoA8h4qVP9FQfwDA2VbfG5uZOSnj55+h2HyP8sFzK0vXJz0RVIwhHBCpZCSVkIrZUG3Ak3y5AThlSeXS4Yx7iwfzb/DRu+uj/7PB7/w2IiDaSNY0tVCtUCDs1RNK0p1apUeLYNkKS2wCoZR8EZOMZyLd76DMPkfuWi17cnN1mgI00iMQ9UgoRilSV238Idxy2lPOtPGuE3DJ4YtJFSL5tzB1v53DCY/Z02Wac4CpRzyVDdUMlYtnXGeSzHmhaG1VIrzuFMfBcsKCapACh2Cuiul1mffIZgfuugAxSgUIHpwFDAWodFJq9HIAQQQjC7xfZGLS29XDE94nlaXy6C58x2BebZlKyFvKos/6b2TdSse57rpuhrjDZ5iKcikwRChq6bGLMZSTB8PGXv9SadAOMrk4fw7AHMHWMqBeTWgnaVNInFVSVyqVtNuuQVyKcqS/4jJdE1LWU5dWJ+00J50aO3u7xwmf9gBQsEzK4qxMuvE4wxJijSkikuSNFNSi6osq8EFniLoctY46FdWDGEFFfubA3/hO4U5tAytFfZVSEaPNxiEonYvSALiAApJph+HO6PVtDA8SiGtW3d+p5LJf7EZqkLS6Wp1qqyML8eZG9xSfMcXyZMJvrmq1INpQqX5tGIIc5gOlRg/+uZB4HVhbhsx0hhwTKG04ThxLlBkGhNoC/SWuTL9iAdMqHGOEY4/YLJKM0xf8pQY07u9ZFtz+e9EMofHQ2RSIZ7xeFzH55c9FMnExM7lcg1T3F3SeKpW02o5s5fG1MyaDiePuZ2uUrRRXhvJv12Yu39zjo+lvSm96YtF3EVSdYglRZPZkxNdUQ04Ob07UrKnOePVFRINwg7YZevo24OB4bXXRpWqkIwTXwz0llhYLqUVaXYHJLLszWqWYz16I4aKOyRZMc2rSnn5s28HJj+3VhavT0+F0npcpwkTTKBUTit6c0iV5e6sJrOT4iQb2WchGjM1XV0qe0bHUOoX8zcOA7mQD4AzUowlHnelzn0llaeKHUWWey/Mb5U1NMknkeVANkZgjNMh69CNw+znZYwxPk61WrXi3hCJ+0lqg9FElrdcvjhgBeOaJxvZ+wLZ8HoQkaaVyS89d6Mw+da4mNPk8ASL/8mJRZNk78ZbYbwHJTNelILfBnpTEv6NPLlh5W8U5swaIpGQiI4cTy6+bVOR/wfGvwdF6sKokskD2I4WW6OzBrlxeBbrWP7GYPIX4XbTws3ZxBLO+rNaSpmSrwx9LFKvjCSzM6XCkQTZR02LG2JeQoX1+Pkbg/nvVplCo2p133i8OCRHBgfD4sNKmtZhka5Smy6NFihxeHAnaGBvmD065UXqltY6d0Mw31yjNDU0tW+J5lFkcOdggoQuRT0WoBTlN2QhSZmBHcBr4b/gqBrjpMTp9DiXWOu5G4E50xaBd6G6jLtnwZL1GIq+P5CKqnQdFpBEA6M0OBiRaaBqjqgMGCWuDvFjNwJzyAkJb+ukoC+DgzRKRFPs3C16XcEIWqIJZ+nlYdIizG+jZEDgjhlW+bkbUeDDCxRoLnGJPhqunVnQmIE4pOg1NUbttTlRQtoJEG+gECXzdUi7HBrHfNTfwGFeE+ZOyzCmqgYqIRgkcUVoUkiB9Yiq6lbrC0TVg/WGp4jXStB8SRBJRWbmKpQtGMZofVG1Drx1mPNtBa7AwQxNeCz0fhp5RiKQilHJtyL9khEqhcK5sEummEyD9BaYihICY15F2kImY5K5/Lm3CJP/SnwSSTQNEr1dJLwTgsEEkiRPkcVcwV0TkbDqWbzu6Ekky6zsiUaWw2Gi85yWlhMpjAJjuqxeu4BzDZgDrTo8kmHR58dUAgONOnQ2KxQZ4yW0AvIXM747TgRDpoWepsrRwJOKv5Ku13TPWyI819zWf35LMD/UKlH8YQszSjKXKdQtmhKGjH6UTGGFvbtK4tfekAlhgHGn0DC1b/pT4KHxUS+tC5W4xHe9JZijDhU6ypbke2IRGkBj5DDuHZFIeWQJAxQhvYYVkSP0oLD7UUkWKk+SLNJPvTQMZtig8B5xNUegettbgIFfonjVMXtnr5hKOyNSgtyCpqr4LvmqjVHEsCSgTvQkPFPKZgeJDHOu32NxjU9iNpHpW4THPfQWYJ5dpoKdneplgTQwUxMUbMuUKanhsBglAZMQcw1DI8ua2plPZACKUp9VBsx4CDWBNElGYtdIFa6C+XELhYMlrvabEK0TNNBgqImEZ5k7MGo4QaFMJ3+gp0bN3nAH48TYZpWKCKQzUpF//s1h/gQwSluT+udJ92fJ+8ABDE02mlQiKI92dVakVmqvYHB7jVGu4b29xM+8OcydHMPEpC0xgdoJ3qRgLISXIIMWDiZ4P4ws8vCuZHB7litREWl+kWad/nT+zRW4NU7au3WUuj94MJKcJSeRIJXtCK13NpPd06Qev4Xb59h01aiGHHIsENTvvvnUfsYp9QtGpndVe2A8s4tZQxxSN84jC9QLI2s9vhM/u7ymp1Fja6eECeMH3lwyR9vtLdGKpHVMBm6syVJPvEmX+CZgej+FKuZgl4XmUw1KUy6U2yaJhs29KcwfrNU1qd8FSr2jpDJZCipD/RclBlvGyew3ELB7pTSqAKM6TLdkXqU0V8EcsnS1H0YYs+6Q8S0IgXwI5nWMU+e5RWEqeycCy+X2oggaGjclDTUnfvrNYB5t4R2KvbFSryLKEuPSG1xyQnvcUQlKANEn0vo+ky6/xitYBQqtcV3O6sXFQ9eHefSrWM/xwiQ14JHMrpeR1N26vGVwOldCP97UErL/enykjhX0/PbP/f69219rh0LtuLz9V+6VNXb0ujDPjSy2UPqIblUZGg3vzvqCo76RaADzMBPP854S7TM8gLl3+/Z7M850/Ode3r795BVd+7789WC+nfpBjILvbztEwrJ4LKoz/EYwiURYf3j4khnuwBRVtdgDo8kntwNCPbXwmczZ7SezzGxdDyY/Z5qaFKRqnbcxO0oa1o8rDjzTNVVGLTJneprJCbhRQUMlpB4Y8zVI5uwPqk990vnQD8ZOXmHF1jeuBzNipii377Mz5KY9GLhtvrnJmaYmVE8WvVfRLOqz9fXNlBaVw+L3crEPRtW3E8zG//3n0x+Kbd/+Gabyn7wuDNRcYnHJ01+aFJLnpkWZCkW7BxZmnoTcEmriqgvywDKG8rClqihrqd449fqVIRYTNM5vmTsyV2IxdlVM0w9zOA47GWdSJxMR0i56sSXusHlZURb0MMVWV6EkwmadkpGmloXnpNJWQvWqxLJXz5HYZ7ZvvwLL2EBZRZIygDlzXcnAnutmryeShPvzFDKsNZEwzwgYBP64BEXn0ktUjEzuRuwVLkJ2UJ2o7FtGiiHYlVhG2khxxrWUmZEWrwqE+2GQthUtXRhxqSMZSlUTpCHS2j2ASeoAkFUPJtx76WWxVviKhX/LRfxSLpoBjJhOr53NmPoGr3Ezo+mcS1uLn30w2ygc5NyfybJvXai9KkEz12yKcpgDkIQavupad7yFF+VrOokGspN6YcitvabrZ01e03jm5FlULdmxN4TJnydtWTwris9Sx+UkACMLvdCTYgWyrmUpBu5cgXjcpuIVu0IBbqIPBpM7Lp+N6VgN0vRfyWJhKP7GML+j68jJ5bOLUsfb9cKIm1Hek6QPria2wmT1GVFgxX+XLf8ZyPcSHRr4TSbHtqdQyIoyk5j4lgLAth6LJ+tFiV+BYnksvkNOoBAu1JXd4y9lT9OHlq+SjOOt7BLNguUJT9XVLgz8uNbgLzFT0GhRzdxK04W5be41rqooPzM/lOzAFIUYAsEoyqh5jXHKVur+YjepTVPP0owDTLgHRlZrjAaJOuvoq6n10/QM07Y4Er0UWxQw3TAl4SKzpQ8+LPTznocfvoBRyGrr2X4Y3Ugef+WVC5eTAvkhdyd4ZdYnGcQULKr1XJBNb/q0rcdjczRgsGhDwPQ4QFeTcLOKFbReDCcfcrNZV9/bC5NdbycvXL5HGS6PUVkdc07fuQ7TIm+RTM3UttB8IH81zK0jCAoljtHUJVkYUP+CFgqYpjU+bjuOM39qNOmEs4lGIJpsIpEN73Tfh2pH22nFcbUsZ+3+Byo7VcSo4USXRdTLr6Lptk8FMI+O8CgTMCm9E0R4kqF3zKp2M965LMvdm7WWA5gwBAX1NeafoF/ylvek3bv1dZOtCxipE8DS7X0en8rk1rl8H8zpZY6nwFvQ8hlcidkDg4EPV3i8/1rf6X6sstOj2euuD0IwC/c/seVJ8QpL9MIgTsMsMj2iDg4aNOc8HA9mf4vTL1IqkFIEo/XAJJgqL/vvjkV0/zY71+fn1Z3hLISyV3bDbUXZTY8v0vpgh7yik//qFU0KOLLr1nC3ijdmWLDDcvjIgdMezLPHuJj8GkeaRZKR+mDCetERmtCOI/+PZsNRLRW3woPOBWdd0GSzumUo5fnmKKpdQ+HCxMaGxuJitO5f74cx3cLspwr7CrPrldl9sxVfOGYUOPx8ftvA6R/m3BcY1/n6rEsROeuDeeL+++OtyWSdD21EVUWR/s1QbsHZu95ECLpzL1h2urZYbS5xtHruVQpRdULi80vWE/c/8YTbM06YXXootC9U2BfC3xMFY2qqYISLnu6w1ult53lKoNQwdmgeMEKzAqbrDeAgn/jRH72/lE47KXUjesvKRDSr5uplPVtJhmw3u3dvdm8WRggm8WAuiiuratFw9MOoZux+4n6XwozAb8NxrwGmAJLCCfwtUM9WqDA1i7eYWAcM97o81PBUYWWq0lhdWaEkrhZ4WoKR9Y898UDSCDkpYbE+DGuO6rvhVJqKUtd37sV/6iSJxs5Fvd8LMY+G5p9wI/0wastAc82JE4SBv/heKJwQTqSO2vA2S1+ZGJyYKpw4sW+q8GXemCjAn4gc1kvvyV2zzR/9G7BkTgptD7doObgVjQ0r5Wm+oNTXXZj8vYMueUlb0OZSHoyhPPCEHCgw+TtaTYzbygkBIHBOCJzy7GrbuogQdNvvjjifwuNAmdp35MinOF+tmAmVq4GvJH+tWwsfC9FSAt0rJW7GKJxYKI2iAyM5etBedx3yoKCNRnOgjRJMaPfyOsEEaU5UQiECq3InIBIxSn7IYcfnjoqmx20D+WcuWvpa/cS+wr4jhRMrjl3Xw2o8MDQU7OLH0sKMIkYhKmmNWkaK8rJQ2dHxpPARSSNJksmpZ2OxXCojfehD0VRy+HFdeAs1gMFsyqGwpyhTNEgFo26cQCFrtc/o5f/kj56xfmoKvy59ippBdERBrBcmEafPrczmbpHOxjI5JGMxnW7uhQzdNrmD5slYbPsVRP7AeQmRBLl3P4milAdGD8Lllcn4JKmuHefUJHX4R7a6g/0XrTUdcems8eWfguWL887iI40Ti5MAylyKxWIn7713eyz2ayERuIQ8QXt9ckryI7HYfS8/8giecPY/IG9pizhD9YcJpSQ4YhPan6vlLKeiw9znnt5/5zUcZf7uQ9/8zX99YNlaHkG6zdFt4M1tivLCclysBk9NnI29/PLLR16+98qq0ukc8nkIphK798gjuI7cd9KcUcpilGQvikCmAmsqzEiU/mClntqkrOeuUxLJ3313/octaVH4bq8pRkR5Ft2sbMbufflIuXzk9+WFYIz6aCqZR44kk8l9Rx6R0R8y6YpREpEnRimu0+Kv1y1GX27hDcQIu95kiee0JSOc8OOrhEcTR6fr8LC98fIj+FbY/lJICXWk0hkrqNtHHhkeHj7xyEfspGJYYpC8WE8Wq+8uYJBmejDR1LKmur2iuRZM/mnqdNOkIIQATdadV/CRk7b8mU/NzIyujvmxt9cY1lEcZWZydqm08FO/Vh8eVubpU8imXyWQU2hoYTlNlLe9r4vjsK+9orkWzPs5R3MO9+POBLJD+B93YZhoFhYuzCSTQeOTjxEKptVwKJRM3nN55jKeskCDJPvpAdQ3xRDuax5GURPlzp9//g+RNJ6+LswhDh/KUnrCd06JIgLeiNu8BzDDdHUR+kaJItLgGh5/CZ9AdoPyiYzYjdYyaqaofHowj9FOAX3XdWHmUkUeZ1GuSkHhg3Gmu8sfm/Fv5LEogdoonX91YGbgQROUG/g+G8uCgIHpDmBMgvkCgl1VtX7gOjC3WZrKAKMxWpwgmDBiorgYnx6Y3lkUzPFhn+ae3dzVK8tWxzOZqWgNcVs0gInWAJNC+/Xzh4N9C9eGOcSLURQKbrmFMTXllT7CmF0/EUr2w3hSueeVpBLaCgPRzCQXWr6bpCw7GtVN0pha1Ft911DuY9Qk/94XJevP3hAGdRGV1XXheNnionjDsMvV5Z9Ihjyl6ahJYHu71i+gGQ7dMx/3BIMIxCXPid7PaBfGrCG4+Tjd7+tFd9cbwpzDa/QypybJGkopzJTpLTmGbvcC8rhemIBiC8xwaHhmvpXjaljUsxAxRTeiiCYpAglgaHabHxBa8aIcaM3VawdzTG3ccQe/haL41EaN0gUYUTUVHdLiu5tjPVO6qzS9P4aGxx5//X76RMjuEq6e49rGEIqwO3SRTQYwxVpRPSz2D/xvPZhQ264WTDH3GwMvNDSCz6lDt5CEmVZkvEgLsMu77YWZpPJGV2hs4aHd9zdYtAgW6k9DuXHDzwa5v30tEE1Nxdym9PGw5mfc267WGA0J58cbUdFRq2XwHXEtDZo6lEIYr+U4t9YQ9ZRmjGRHkYfLxuhCc96xONoHUSmIRjlD2QmCiAaZqQlh0es7nXO1qP6guOdd3Lr7mjA/yaOHsXPoAymaf/CtkrQRloYozr5FtFeQKgIHHcCNeIu3WtYDD/zq3/zV3bs/RkkVYkA8sYgJTE+jskc0OhTAsFoUfqkHpsh8ibwQ95eetl0lGP4z2I4Sp+o2PmBN2xGVMpkMwjTNh9F4s21xGvoh5tit3Q+98vhPPOA8ML1USQkhRmvoKLeIg/eyqJQmqr0w+DfMHq5fzPGj14I5wHNfp01LKbFkjzfPwUhk6JIgcNQotGiuDpd5EBsYdWahIWa2Mj9t11eMfUYJvcKARettUqlz0CNKlbzXUqGVXktdlz0NvFpKiOYXc/462LatLjKOQXpPQ4hRdGymMtFMGG+4I6NJVG6KWmVylHXKdJlrL1XbTmXJqE/rWCmOU2I7Se0OkxaNMZN3ZDyaiElRPL0jmqp7aOJk915IsZH81TC/FG88KDanBM/GO+pDUmTHjh2ZiBRNEYyeJL0tib2dLMdfX5g9tYmezpowkqmDdWoDGh1va6rGpUjAAhNc86MHswdG1uOYUHdp15LMac5eRLHk4/+rq2S4vT4U2UNXRGtETRbV0R6EXn+HLBD6cOcntmefzNVEKpjK6eUVhNrJhfrkh4eYjA9BfzLEApio9/Hk3k5rM/7Ye3g0t+tqmGNM+yhYDqu9MNFUakdEXHKuiMker4PFKNmMeqE5f1L+W6tPNnIiMWW51fIUfjvW5i1Y3MhZ8TJUosESDeydpvbRFHkLerb/KpgfsIqpLwx8/A+lfphoTvJgItBBzF+Ew0qpVGEaqUnu9VOrl6yatxUilUqWSlAZC9lRnGf8V2V0YgksDC0Fe12fatHr90vVtOXnroLZBQ/52Edf7G1YjxIMk2L0pjtiusniGlvAToJVNEEJpeHx+UvfF/d3ZTQqyuq6geCXehbNmA/Dc2LGa1G1u2IU9G6Je2mN8wN/vLVCPlJTU1zra56PRtXoBsvgfWORDIrbccZscox7Q21EFUDhjZJiN/AdGszQNLlE2zbGEepy2YeRGtGoDyMFCyN+JjVEfUFEw+/cKpnPcyoXdRqifRiSTAS5WywifVCHCFIVeO30klJqLDo8x3Kbs7NGA8rTwkY9h1pAgFoHTCrrqUwM62lRf5gC+9cpXmI5SfQAaa2/uwXmEI96DRidTmQ8DwOrmcQSC+sf5KLkBzOTXlFCB8v1FCb+eP2ggSYHxuuldok610NJVAgAg2lNL/ugqUG4GxvChPsIXRq9pdPKdcIUstnWa32jYillSI12XpaiuwuW+8xUJiciroVQaGVWMaZLWDbSDShsaVRPaTmnrNMeNXjNEvlnnt1Q6XUnX2NDG576dRh6qsyWUeH4wGGNCrA9MLu85fOhsNrxtCpiGdVjkePkxAWNEyrNKqM2RklPhgAzbsxgwNbsSkjBL4y2mOY5VWcn6ZVZHh1SIRlVu8ayb5hNDvxXODr841gvzDkvG1BXDbfDElW17L33nTx5MobOcZ+F9HRpSRlfUhbQ826gw6yUVCZ1KIsdor2Da/7cYjrPEs0HZa4v6kMEE76aRrVuHfgnVgq/sr7ahXl02ZTgYtW/+ut/XgyWiqPqUJTiPFnX1VrKZ0EDawgI9SWhraNGqVwS+ykVA3WHejVp+fk0Shose/KDoIllGISDOKQLo6oZXzT8W9grFDfDYXMkv61rfTOAKeq/PvAXEx3B4C2GqGbGJbMRsGgpW8F+mHopRENkGHqpRDMI3R+TtDdteDIXPDHHuCnDLGS0qNj1E+2ViJTwV8q/Fzf/Fgen9dVtne4m0QuZs/7e9/xtqSuYIcKRGG0x69b7dZAo47oz6dTH7fpsyS7RTpTJaZRNZkOGXus+E7ux4tiO5bEMRdGm5gsES+T0QziDVSC6vVPEEufRAGaXaGlJRblldjVmyLuwgob8snuLXDs5ipovy6G6BKdEe88ceAaYv3JJsRp9CxWMb6gSfSJcGypujnBELMSQVOiSLIrKv8WwoDXiw9xqIa8IL9aGtEag50MBC95FpBq0GcW7QUOvKyUo9OQ4vrwPIC+NIc9icAR1lMYCDvFsrg11r6jUu8Dq03Dae30Hh4wsH+Zusaq4pg1Fg8WdMCK7QDJwCsLe+ToM4VcUQ3htCIT+Ui5eY2VltIHHfGLaWkNFd18s4o3613wl8SN/XsBIWSmA+ba+B4P2ue/FbUGMeCgsIQCHungwqqcyLCjxNrB5BLLQbaYzG85bhw+v6XBK6FL0YNBE5HnyuJikFApfJRqPRsA8n0LbaACzS0dz7/cMPJ/TguXPoVukIJgeGkqRItTINYo7WbYzVeW84SwgtsMo5dxRnspZVVhTrH75gulYpY6tA43WT0Oi4v8U9/8eU4rIXZg9ezREgP+NR/zndRMeaYh1tZcUIQW5pMul8fqkXam0sTjntCsVROXYrGaEKpxpW1R4qDujo1r/wjxExRF0/30ro0bUQIHPYJgYNOkO1oHZCKahxHomCMs14vF2p9S5JZ/EwxWaXX08vLdLC2scPVcW3UeYTXkHKBH9jID5vYFDLLwnB8l8S+/ADIV9g7nBe986PjlaX61XQ9eGGa1XbFu3+l6BOL1HNNGhbN9Aac7Ae5wilESyfsCXzKct9IAg/n2sKxkpgNF7P2eDYqvqpLF3dTRdTvfs3UbdfXbJsG1aCzD7YbSu2iA5VRE3ihUzASXl2uNMjYQzQ9qc55vO/fjAnAtb+DMDd/iSwXJbJhL2PFm8F8YaxnYwLKejRZO2+Kf9qwCu5FKBdginlXIr3q838bjWFY20obsRwgljAof3pLiZjWXhMlBoJJjz/JdwPsceNcx+ZgCLxD5MOJIlpUm153s+J7eGRX88+p2vGqhCGg/SJpdR3us8WIO3nFaggJmNDaz3uYDxI+RwRISnKv+KCCH+jLFvIgB2pXBEa1tyRCw7RrAdiESDUs/qfMdJ8ngL3tmg3ThiT2OvvtAeJOy5mKoqo/FcV+Vr/P55G21ce7x8LjPE2ZDJI/1XLMLPe5HeUVP/I8pTqN84Y8oRjxlohG3ydXfd9sXO4xZGCFvpMUhbJ5QoqeHh8mgoNF5pBHFEznryoLt+kOt+crlHbMXqpDHeNRjxykXbqDvEPDPw1wf2L270PkGi58ualYOlVZutnGCZpJRpVGyautZVoC3DiCuUMd7wM5n5gxWylJjeImPfs8GjWE1gnTwGUsHBRywoieRHpIzIuw9wNbJHCESMJTK3jDVaruQ0s/KndYsyAItKVlM91Va6YgWlr7iH0QolHYQOQFmrr5OZrHGnXtGlcGaPzE3aSGFy/zZIOrKyPvLVgQ6M/MHK3OdxisP/aGmYYkM+zRCer1O7LNPsima/Hk9xe5i2yvUJ48iR2JEjfQ+laau53WDAceqmW4fF1kuQpEVqwzXR9SkFogGMxjptK9CZOXkwplojx+YsVPszndEMZyKxjNUsKXXKz3JWjjXqw+l93j7jjigmIqHIYB8eKXdyuoH4Zm0d69MuY5OwTAdb+g5ph05d+xlJzsg8G9Do7NzA93dgzuiDUGckStlBkQj0KJZZH4WGjKLigcoZQ1AVEpOmV02mvlzoV5z03lCoHk+J6BC+PEVbOkfrJUffkZEQhqL0hIbvLKsM+nfi3S3328j6ZgZJjQZjka0zDkpSn8FxHKvI93OwGDbSt3S3AKxM7bn99h2RlT4tSs9iR1WcagI5lP6cUZxPUFpQlBm+Y4dGgslmsrAyqj7hffAYn+tbyDhgxTyZdC9/9lP/2UK9rYzHESkh055EyljuwgyCBAWY2yPY0r3HfyxJO1OTpyjkyqWwio0eiRI1EyYXpR1wUmomi0QTFtfybxTT5/r6Z/K79MGJ2DWuQXZBeeXvKAuwwSKuw+EdgEkG+rJyO5WCIigIxZQpaWJqcFDAhArpZFIXWRYW2kvzM/Tc4QuLOzBKEpmxCSBkFyM+jOw34v6l89/Y5p/ttT44AenQWPXCqK+HkoCJ694BEN4e+WTgHSWMkahN7dkxpeCbtEK2D1ta00nDC8RS9ub9w8qFy0pSmddjMofCxLLb6YNnF8PBIPh11wOtA77XPjSiV3DwWlgyVwd7x0xfs3eXlr1KEEXc8AVTSX92G9mpiYnIDnkPyWYlcntkCihj2BoD6zya85LhVK7RVB5+RUnO8zCyUikDpzixPbI9luEb3ucdnMhac79z5/6jKNoHqUr+0BzOyLNGWqsTPeKJZFRTj4vAFx+Ui67WannMP+Fl9siRQmEwgXIf9OZ2yVPj0orXokEv8cLOdnvN3kyFyRkCJhvD4vf2kzKLqrEJuheGRH1J182Ifqi3WPS5938ub2XFE3wc5FkRL+YkoaP5hRziXsXXmtmpI8CJ7RDXhwZpATUZOojnTNpeLbSTyKVEIU5GyAeYiQjagll8Ecv9qz4OBu4+afnRDswf++HnhNAc2tUVoS6CHabngJmXvbWrsCxYTR8mmC/D+BaOFPbcDrkMhQGBoiy2vofKONSj+yJxzIhwvmELe0qgKoCJyVc+E8lUFvUwcIgIg3VgSx34HPcFQ7sVqViVkX0W5gfAYtdqIeTJZio7gevIng8BhgozYKF4tLzmp9udEIsvwtFJETT3QoOvUMM0etvJfqiL+mp2dRV3Y7/dLYmcO//pfP7bVjjQmMHwnkHaA7fY+xmZbjneUTiKJxwjjPQD+R6ipsHhsVB5FtEfoNoVbSsNQgg1gr42WboCOwOa7ZErFFZlzEUkyPL6yGd7KlfnuT5iveTJhWpDlWgsNhGO6M6qOR0IRtPsxqjwywq20SrDNMcLU7gQaaKGn5xap6NPUJxoHHS1HoFqTVuzVFGgBAy8X4zEIr5kqOcoqx/7/r5y/Z2WCmvkj9F9MT0ejg1ORNTddW26WaOQnCIB2845w96JQOUyrIlYAVQUWiwMGVO0zRcTaXjMyrl2zROLB1OZ/pdNNLGyRSoWZjCjsrHtH/nIRCyLCAfOSuXbtqzE/aRVGZy4DxeeU7GOLX8KihXjlWbzeIVq8Ww3Ks8H0aZqK8PemvbSCrbEGmVaSCgYK2growdn2qPjlGU2YWLmKQHGSx+v6HbFtlAb8XbDZ8KR7TR/KAy+Ag+eWTyW37osePqo9VIFl6lbc/vzZ5yp++5FymE3Xz2VQg079dRxXjn4YaT4zlhycpb2/FFUV12iA9EwUIZojUCEB1eN1Lbp5r72/5r0IWra8ffZLku5u70+CFmk8mRvYjRMcFW6dds1Vm8/fejo3NzRM4f+WV74q7DMm45bsV/lrq07x6nJVJ9/Eid36MiyvYXSAjYr0RZQYQWxrktS0ZjjWFggbL56nLkV5OFPNW2TOZcQbzEzEI1nUrNkkHXr2Tc/S+TQSJxVQMOmHfuUfel9vPmUY1/+MQunA7GUVaYV5aQQB82f8vjY8LAxiWOM3Gn+1Cea1qVLfP4TTr3ZZHaTAsVLLtVNaBGjux4G4cSwd/v9b+Vgk/Pkq5u2jpC8xp76ZHP+lNO4dCpX0fRpHLxTN5LDdb1CB8jRwhtHUS2VcysImPmrlxprl772W//qxxxdqziO5lZONUmVKQXHoo5uEhCt1CD8tX44/5ZOWTlPCUrNniaXraPrlsfbx39sjbla81U6OymlO6yWc0Znxkp1DA465kzTXcCG49T8J15tUp9uy6Lzi5jZrFeEW0Dcpw2Z1gdG+CL9Ar1f1rE73+KRL/ljcVoDWLRPNW3GKsgm9flL+uPN6eOnpk+51O9TE117yB9TcHSwQs3Kwafshfrm8VexRMhQj3Dth5rQOuH0LZ7T1Iw28mw+/9z+b0M7j53Zf+tbPn8mf6C1zKlLy6zoegXtflYFPOa0ax9fEBbQdkXBRk/ZFR3KUZmu1d9n201X0+Ou2+CsolvTLoqQeAedT0/N2lgimnvubR2G89mn9UnDiZNvYpbrMsvh07CoTHNd9+D0wbo9/ThMm3vq+HF92tabJD+A4PSrD9dwWpHLLZxAZeXI+KFWvtamQDlke6snNwxznjoNC0bJQe2QPzSPhliduWzTrrhaxazUXftxu9nU3ONPHf+ETVcTDce2w1wdwzLPbddyLd35mkUr8nG+ioSBMk0cwvQjbwPmQEtksbBsFWNp2b40z9eZ7mzq0yiXnZo0PeeAyXP8E0994qnHNdN2Pwwl0ivTTXt6GmUG16pUnEsPNbi9WrcPkjtD0oPFIXvuxmFOWwvDY8KYletYj+QPPaBP6UDK4Tw2167Xm7ZLeoRhsxeOV1Ctwiyahqge0nXq23Yestecdce2rFFlqr5ykM53U6ql0JjSfubGYe624JRFBFWdpkWc5XjlT50nN1F3EY7YpBs3Yc5sexp/mqdO1QmwQh03NagMtx93bMNt2OSwqqu28GbDF5Ar8Pe/jWOCRioQKmUDS7MU+JbslZVla3YVMWQqqHq6LkqcAme6UnH9SiiW3TnfRDTNN1c2JxXhPg06dy6UnBkujVv7344Cnx6xQskxcYYfLWPj86048I7G6Djuk0ttKa92qlQwOpXVvdUlLG9MrtQNxTuZ0JhShmfGxpQ1vv9tHi112FYuzySrM2NeD5xxkHbE473HZ5cc6o9FCdyvTVG9HseBoXtutb4X+SQaJMinG3tLfg0pWTKSY0mlPfK2TwD7oVYb7ZGGMublSeL8N2Mf6eE+jFx1tr7aZrTMjpZeXXcwUksoMCr79uFZ9godI6UYJb/TZ2y4lAyNrj396Ns/G+3ROWt1nM8qn0TQj+ESTZQEVKUJn6bzIA8ivCohmSJGZa+xQqf5EPnSXiGRJIKLJJqOkJ1bdnv5TP47OTUuf+5L1nILld3k2HAVEXjSPzlQnLBIN52tUjSs0PGq+EfBUIIC2xKNzfDMBWMMVxInXozMncl/x4f75f/RrT+9No7AdrWsYNjHQvg7lgxKIDgPU1TVhJp263w4uaaMDwCNpShZSdaXz+TfqdMpD42sVXDuYjs0/En6oMN0C69nG7crV4f9mkSylDS8Fr6x5LCRLANj0sEooov/s+/kiaZ3P/OlkY9/fa1u0I2XSthRhXuBCz2TYzNJ0UWYNPCvMe9K0topxNU+PMIPf/HoH+Tf+XPI89sOowvdtq3dkxTvklqjHAwFwvCJNks6YBQPI3EZjy/blc2Rozd65PWNHBeff/+hZy5+LHn5gd2Ts6M4ltfYRNvZmq8qoSnHmpzCARfj9toDD29+8Zd/PP+un+p/zrqQTB5/6IHddF26fNw6ipNV4ROc9pMzlx96ffduZ/7fH798wdp/M/4XA8+2Ska1es89D89cuHBhZuZxnr/t0DN/5b+cadXvuXw5ia2EDz/8D6vGbPz0zYDJX6QT4Ar70t4Z0qP+mTb5kdlCQaz10OHSOE81f1P+5wtH214NrTQ7C3s34xVx/+M//lKJHir5FTb7izcH5kC8UhpHKMFcdNe6bf8Yw/ycwzgCq1zKHh01JuNzAzcJpvHk/O66d+Qq1ve93DS/TB1ziAtLyICdRmPXzYG5s8Wbp/RSmY7+LbnMb906x3OrhjiCu+68z87xAzcHBocSIHpBMIOzitFEye8OtipghZ/RONEvrhtcvoMwA/vjlKZqudUKxVT8G/4Bkoytu7l1Sqlrufium/S/MsEBsPEc869Uw99U/O+Wec1/rIZNlqdvFszAo7t4cLVGgtrK/uXOg/z8owM3DQYRqfhfzlgju77SNSfPnqeHlkeOHfi3A2/3+v9hJIs4on3VZwAAAABJRU5ErkJggg==',
+    side:'data:image/png;base64,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'
+  };
+  var hasImg=false, imgState='probing', kind=null, mode=store.ui.petMode, petk=store.ui.petSize, pos=null;
+  var MODES={stay:'原地不动',follow:'跟着鼠标',roam:'自己溜达'};
+  if(!MODES[store.ui.petMode]) store.ui.petMode='stay';   /* 存盘里的模式认不出来 → 原地不动（否则跟随/溜达都不生效、菜单一项不亮） */
+  mode=store.ui.petMode;                                  /* mode 在上面那行之前就已经从存盘读走了，这里按校验后的值再同步一次 */
+  var REDUCE=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches);
+  /* ---- 陪练台词：每一句都能被用户自己的文本顶掉（规范见 references/pet-guide.md）----
+     优先级从低到高：这份内置默认 → PAGE.petLines → 页面里的内联 JSON 块
+     ⟨script data-petlines type="application/json"⟩ → 外面的 pet-lines.js 里的纯文本
+     window.PET_LINES_TEXT（"键: 话"一行一句，同键可写多行）→ 同文件里的对象 window.PET_LINES。
+     那个文件必须排在引擎脚本之前。认不出的键一律忽略；{n}=错题数，{m}=当前模式名。 */
+  var DEF_LINES={
+    hello:['我在呢，做题吧～'],
+    back0:['先玩一下页里的演示，拖拖滑块试试。'],
+    backN:['欢迎回来，接着上次的做吧。'],
+    right:['漂亮！','这题稳了。','嗯，就是这样。','对啦，继续。','你比我预想的快。'],
+    wrong:['别急，看下面的解析 →','这个坑很多人都踩过。','差一点点，读完解析再重做一次。','我在旁边陪你读完解析。'],
+    hint:['提示只给方向，答案要自己写出来哦。','先别翻解析，用提示再试一次？'],
+    done:['这一关过了，喘口气～','又清一关，了不起。'],
+    all:['整章通关！要不要把错题再过一遍？'],
+    filter:['只显示做错的题，加油。'],
+    empty:['先玩一下页里的演示，拖拖滑块试试。'],
+    wrongN:['你现在有 {n} 道错题，要不要点「只看错题」过一遍？'],
+    fine:['状态不错，继续推进吧。'],
+    modeSay:['好，现在{m}。'],
+    modeTail:{follow:'鼠标一动我就跟过去。',roam:'你不动我才动。',stay:''},
+    modeName:{stay:'原地不动',follow:'跟着鼠标',roam:'自己溜达'},
+    noArt:['找不到陪练形象。'],
+    howTo:['把图片和这个 HTML 放同一目录，名字用 pet.png / pet.jpg（或 pet.jpeg / pet.webp），刷新一下就有。'],
+    fishOn:['好，大肥鱼上岗了。双击我换模式。'],
+    noArtBtn1:'用内置的大肥鱼',
+    noArtBtn2:'怎么放自己的图'
+  };
+  function lineMerge(base,add){
+    if(!add||typeof add!=='object') return base;
+    var out={}, k;
+    for(k in base) out[k]=base[k];
+    for(k in add){
+      if(!Object.prototype.hasOwnProperty.call(base,k)) continue;   /* 认不出的键忽略（用 hasOwnProperty，别用 in：constructor/toString 会被放进来） */
+      var v=add[k];
+      if(base[k] instanceof Array) out[k]=(v instanceof Array)?v:((typeof v==='string')?[v]:base[k]);
+      else if(base[k]&&typeof base[k]==='object') out[k]=lineMerge(base[k],v);
+      else out[k]=(typeof v==='string')?v:base[k];
+    }
+    return out;
+  }
+  /* 纯文本形式："键: 一句话"，一行一句；同键多行 = 多句随机说。'#' 或 '//' 开头是注释。
+     键里带对象的那两个（modeName / modeTail）纯文本表达不了，请用对象形式写。 */
+  function linesFromText(txt){
+    var o={}, arr=String(txt==null?'':txt).split(/\r?\n/);
+    for(var i=0;i<arr.length;i++){
+      var t=arr[i].replace(/\s+$/,'').replace(/^\s+/,'');
+      if(!t||t.charAt(0)==='#'||t.indexOf('//')===0) continue;
+      var c=t.indexOf(':'), e=t.indexOf('=');
+      if(c<0||(e>=0&&e<c)) c=e;
+      if(c<0) continue;                                  /* 没有分隔符的行直接跳过，不报错 */
+      var k=t.slice(0,c).replace(/^\s+|\s+$/g,''), v=t.slice(c+1).replace(/^\s+|\s+$/g,'');
+      if(!k||!v) continue;
+      if(!(o[k] instanceof Array)) o[k]=[];
+      o[k].push(v);
+    }
+    return o;
+  }
+  var LINES=(function(){
+    var L=lineMerge(DEF_LINES,PAGE.petLines);
+    Array.prototype.forEach.call(document.querySelectorAll('script[data-petlines]'),function(s){
+      try{ L=lineMerge(L,JSON.parse(s.textContent||'{}')); }
+      catch(e){ console.error('陪练台词 JSON 解析失败（'+(s.id||'内联块')+'）：',e); }
+    });
+    try{ if(window.PET_LINES_TEXT) L=lineMerge(L,linesFromText(window.PET_LINES_TEXT)); }catch(e){}
+    try{ if(window.PET_LINES) L=lineMerge(L,window.PET_LINES); }catch(e){}
+    for(var k2 in L){ if((L[k2] instanceof Array)&&!L[k2].length) L[k2]=DEF_LINES[k2]; }  /* 空数组会让 pick 出 undefined */
+    return L;
+  })();
+  function tpl(t,vars){ return String(t).replace(/\{(\w+)\}/g,function(m,k){ return (vars&&vars[k]!=null)?vars[k]:m; }); }
+  function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+  function lineOf(key,vars){ var a=LINES[key]; return tpl(pick(a instanceof Array?a:[a]),vars); }
+  function modeLabel(k){ return (LINES.modeName&&LINES.modeName[k])||MODES[k]; }
+  function sayL(key,vars,hop){ say(lineOf(key,vars),hop?'happy':''); }
+  function setCls(n,c,on){ if(!n||!n.classList) return; if(on) n.classList.add(c); else n.classList.remove(c); }
+  function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+  function vw(){ return document.documentElement.clientWidth; }    /* 别用 innerWidth：差一个滚动条宽度 */
+  function vh(){ return document.documentElement.clientHeight; }
+  function figBox(){
+    if(!HAS_PET||!fig) return {width:76,height:88,left:0,right:0,top:0,bottom:0};
+    var r=fig.getBoundingClientRect();
+    return {width:r.width||76,height:r.height||88,left:r.left,right:r.right,top:r.top,bottom:r.bottom};
+  }
+  var ptr=null;
+  var happyT=null;
+  function bubbleOpen(hop,ms){
+    if(!HAS_PET) return;
+    bubble.classList.add('on');
+    placeBubble();                               /* 气泡宽度随文字变，出现时重算一次翻面方向 */
+    setCls(petEl,'happy',false);
+    clearTimeout(happyT);
+    if(hop){
+      void petEl.offsetWidth; setCls(petEl,'happy',true);
+      /* 跳完就把类摘掉：一直挂着会让别的动画（比如走动）压不过它 */
+      happyT=setTimeout(function(){ setCls(petEl,'happy',false); },1100);
+    }
+    clearTimeout(ptr);
+    ptr=setTimeout(function(){ bubble.classList.remove('on'); },ms||4600);
+  }
+  /* 只负责冒泡（不看开关）——「怎么放图」这类提示，陪练关着也得说得出口 */
+  function bubbleSay(txt,hop,ms){ if(!HAS_PET) return; bubble.textContent=txt; bubbleOpen(hop,ms); }
+  function bubbleHtml(html,hop,ms){ if(!HAS_PET) return; bubble.innerHTML=html; bubbleOpen(hop,ms); }
+  function say(txt,cls){
+    if(!store.ui.pet) return;
+    bubbleSay(txt,cls==='happy');
+  }
+  function refreshToggle(){
+    if(!toggle) return;
+    /* 页面整块不要陪练 → 开关没有意义（点了也没地方显示），藏起来，别留死键 */
+    if(!HAS_PET){ toggle.style.display='none'; return; }
+    /* 三个状态：还在找图（查图中）｜有形象（开/关）｜确定没有形象（没放图）。
+       找图是异步的，别在还没找完就说"没放图"——那会让脚本和人都误判。 */
+    toggle.textContent='🌿 陪练：'+(kind?(store.ui.pet?'开':'关'):(imgState==='probing'?'查图中':'没放图'));
+    toggle.title=kind?'单击跳一下、双击换模式、右键开菜单':'可以换成内置的大肥鱼，或放一张自己的图';
+  }
+  function setPet(on){
+    store.ui.pet=on; save();
+    setCls(petEl,'off',!on);
+    if(!on){
+      closeMenu(); closePanel(); stopGlide();   /* 面板也要关：键盘/辅助技术激活时不经过 document 的 pointerdown，
+                                                   否则 panelOpen 会永久卡在 true，跟随与溜达都静默失效 */
+    }
+    refreshToggle();
+    if(on) sayL('hello');
+  }
+  /* 没有可用形象时，开关就是入口：给两条路，别让用户对着一句干巴巴的提示发呆 */
+  function noArtHint(){
+    bubbleHtml(lineOf('noArt')+'<br>'
+      +'<button type="button" data-pet="fish">'+LINES.noArtBtn1+'</button>'
+      +'<button type="button" data-pet="how">'+LINES.noArtBtn2+'</button>', false, 15000);
+  }
+  if(toggle) toggle.addEventListener('click',function(){
+    if(!kind && imgState==='probing'){ bubbleSay('还在找同目录的图片，稍等一下～'); return; }
+    if(!kind){ noArtHint(); return; }
+    setPet(!store.ui.pet);
+  });
+  if(bubble) bubble.addEventListener('click',function(e){
+    var b=e.target;
+    while(b&&b!==bubble&&b.tagName!=='BUTTON') b=b.parentNode;
+    if(!b||b===bubble||b.tagName!=='BUTTON') return;
+    var v=b.getAttribute('data-pet');
+    if(v==='fish'){ setArt('fish'); sayL('fishOn',null,true); }
+    else if(v==='how') bubbleSay(lineOf('howTo'));
+  });
+
+  /* ---- 形象从哪来：image=同目录的图片，fish=内置大肥鱼，null=什么都不显示 ---- */
+  var imgUrl='';
+  function resolveArt(){
+    if(!HAS_PET) return;                     /* 页面整块没有陪练：安静退出，别碰 fig */
+    var want=(store.ui.petArt==='fish'&&FISH.front)?'fish':(hasImg?'image':null);
+    if(want===kind){ applyKind(); return; }
+    kind=want;
+    fig.innerHTML='';
+    if(kind==='image'){
+      var im=document.createElement('img'); im.src=imgUrl; im.alt='陪练';
+      fig.appendChild(im);
+    }else if(kind==='fish'){
+      /* 两张叠着放、切 display：data URI 已解码，切换不会闪一下 */
+      var a=document.createElement('img'); a.src=FISH.front; a.alt='大肥鱼'; a.className='fish-front';
+      fig.appendChild(a);
+      if(FISH.side){
+        var b2=document.createElement('img'); b2.src=FISH.side; b2.alt=''; b2.className='fish-side';
+        fig.appendChild(b2);
+      }
+    }
+    applyKind();
+  }
+  function applyKind(){
+    if(!HAS_PET) return;
+    setCls(fig,'hasimg',!!kind);                 /* 探针与旧选择器都认这个类 */
+    setCls(fig,'kind-fish',kind==='fish');
+    setCls(fig,'kind-image',kind==='image');
+    setCls(petEl,'off',!store.ui.pet);
+    if(kind) fig.setAttribute('title','拖我 · 单击 · 双击换模式 · 右键菜单');
+    refreshToggle();
+    if(kind&&store.ui.pet){ applyPos(true); applySize(); flipCheck(); }
+  }
+  function setArt(a){
+    store.ui.petArt=(a==='fish')?'fish':'image'; save();
+    resolveArt(); markMenu();
+  }
+  /* 朝向（镜像）要迟滞：跟随鼠标时每帧的 Δr 会在 0 附近抖，
+     不加限制就会左右翻个不停（看着像抽搐）。规矩：方向要够明确、且距上次翻面超过 350ms。 */
+  var faceL=false, faceAt=0;
+  function petFace(dr){
+    if(kind!=='fish') return;
+    if(dr==null){ faceL=false; setCls(fig,'faceL',false); return; }
+    if(Math.abs(dr)<8) return;                       /* 位移太小：不动它 */
+    var want=dr>0;
+    if(want===faceL) return;
+    var now=NOW();
+    if(now-faceAt<350) return;                       /* 刚翻过：先别翻回来 */
+    faceL=want; faceAt=now;
+    setCls(fig,'faceL',want);
+  }
+
+  /* ---- 找图：命中第一张就当形象；一张都没有就什么都不显示 ---- */
+  var IMG_WAIT=4000;                       /* 单个候选最多等多久 */
+  function firstImage(list,done,fail){
+    var i=0, timer=0;
+    (function next(){
+      if(timer){ clearTimeout(timer); timer=0; }
+      if(i>=list.length){ if(fail) fail(); return; }
+      var u=list[i++], im=new Image(), settled=false;
+      function ok(){ if(settled) return; settled=true; done(u); }
+      function no(){ if(settled) return; settled=true; next(); }
+      im.onload=ok; im.onerror=no;
+      /* 挂住的候选（既不 onload 也不 onerror，网络盘/大文件常见）以前会把整条链拖死，
+         6 秒兜底还直接宣布"没放图"，于是后面明明存在的图再也不被试。现在逐个候选计时。 */
+      timer=setTimeout(no,IMG_WAIT);
+      im.src=u;
+    })();
+  }
+  var bgDone=false;                        /* 背景画过没有；专用背景图优先，不许被头像链覆盖 */
+  function paintBg(u,force){
+    var b=document.getElementById('bgimg');
+    if(!b) return;
+    if(bgDone&&!force) return;             /* 两条探测链并发，先到的不许被后到的盖掉 */
+    bgDone=true;
+    b.style.backgroundImage='url("'+u+'")';
+    b.classList.add('on');
+    var deco=document.querySelector('.bg-deco');   /* 有真图就不叠花纹 */
+    if(deco) deco.style.display='none';
+  }
+  var greeted=false;
+  function artProbeTimeout(){              /* 兜底（正常用不到：单个候选自己会超时跳过） */
+    if(imgState==='probing'){
+      imgState='no'; hasImg=false;
+      resolveArt(); refreshToggle();
+      if(window.console&&console.warn) console.warn('陪练图片探测超时，按"没有形象"处理');
+    }
+  }
+  function welcome(){
+    if(greeted) return;                  /* 内置形象和图片都会走到这，只打招呼一次 */
+    greeted=true;
+    var s=stats();
+    bubbleSay(lineOf(s.done===0?'back0':'backN'),true);
+  }
+  try{
+    var avatarList=PAGE.petImages||[];
+    /* 先试专用背景图（bgImages），它没命中才轮到头像那张铺背景 */
+    firstImage(PAGE.bgImages||[],function(u){ paintBg(u,true); });
+    firstImage(avatarList,function(u){
+      paintBg(u);                                  /* 没单独准备背景图，就用头像那张铺 */
+      hasImg=true; imgState='yes'; imgUrl=u;
+      resolveArt();                                /* 用户选的是"内置大肥鱼"就不换形象，只是菜单多一个选项 */
+      if(kind&&store.ui.pet) welcome();
+    },function(){
+      hasImg=false; imgState='no';                 /* 确实没有图片：看用户有没有选内置大肥鱼 */
+      resolveArt();
+    });
+    var nTry=(PAGE.petImages||[]).length;
+    setTimeout(artProbeTimeout,nTry*IMG_WAIT+1500);   /* 全体候选都试完还没结果才算超时 */
+  }catch(e){ console.error('陪练形象初始化失败：',e); }
+
+  /* ---- 位置：记的是「形象右下角到视口右下角的距离」，所以气泡再长也挤不动形象 ---- */
+  var BARH=0;                                  /* 吸顶条高度，measureBar() 里实测 */
+  function clampPos(r,b){
+    r=+r; b=+b;
+    if(!isFinite(r)) r=14;
+    if(!isFinite(b)) b=14;
+    var box=figBox();
+    var maxR=Math.max(8,vw()-(box.width||76)-8), maxB=Math.max(8,vh()-(box.height||88)-8);
+    /* 上边界要让开吸顶条：条贴顶时占 0..BARH，而形象 z-index(45) 比条(30) 高，
+       拖上去就变成一层隐形挡板，把「清空重来」「陪练开关」全挡住还没提示（踩过）。
+       b 是"到视口底边的距离"，越大越靠上 —— 所以这里要压的是**上限**。 */
+    var maxB2=Math.max(8, Math.min(maxB, vh()-(box.height||88)-(8+BARH)));
+    return { r:clamp(r,8,maxR), b:clamp(b,8,maxB2) };
+  }
+  function applyPos(restore){
+    if(!HAS_PET) return;
+    if(restore&&store.ui.petPos) pos=clampPos(store.ui.petPos.r,store.ui.petPos.b);
+    if(!pos) return;
+    petEl.style.right=Math.round(pos.r)+'px';
+    petEl.style.bottom=Math.round(pos.b)+'px';
+  }
+  function moveTo(r,b,quiet){
+    pos=clampPos(r,b); applyPos(); flipCheck();
+    if(!quiet && pos){ store.ui.petPos={r:Math.round(pos.r),b:Math.round(pos.b)}; save(); }
+  }
+  /* 气泡往哪边翻：按"左右两边各还剩多少地方"定，而不是固定 250px 阈值。
+     原来只看 left<250 就翻，窄屏（320px）下形象在 left=240、「大」档时，
+     气泡被翻到右边、算出 x=321 —— 整块在视口外，陪练从此一句话都显示不出来（踩过）。 */
+  function placeBubble(){
+    if(!HAS_PET||!kind) return;
+    var bw=(bubble&&bubble.offsetWidth)||230;
+    var box=figBox(), vwid=vw();
+    var roomL=box.left-9, roomR=vwid-box.right-9;
+    var flip;
+    if(roomL>=bw) flip=false;                    /* 左边放得下：不翻 */
+    else if(roomR>=bw) flip=true;                /* 左边放不下、右边放得下：翻过去 */
+    else flip=(roomR>roomL);                     /* 两边都放不下：挑宽的那边（气泡自身有 max-width 兜底） */
+    setCls(petEl,'flip',flip);
+  }
+  function flipCheck(){ placeBubble(); }         /* 老名字留着，调用点不用全改 */
+  function applySize(){ if(HAS_PET&&petEl) petEl.style.setProperty('--petk',String(petk)); }
+  function reflow(){                       /* 尺寸变了要重新夹位置，否则贴边放大就把形象顶出视口 */
+    if(!HAS_PET) return;
+    if(pos) moveTo(pos.r,pos.b,true); else flipCheck();
+  }
+
+  /* ---- 平滑移动（跟随 / 溜达用） ---- */
+  var tid=0, goal=null, speed=0, lastStepAt=0;
+  /* 当前位置：可能还没被拖过、也可能刚点过「回到右下角」清成了 null，
+     那就拿元素此刻的真实位置当起点——否则补间第一帧就 return，形象永远不动。 */
+  function currentPos(){
+    if(pos) return pos;
+    var box=figBox();
+    pos=clampPos(vw()-box.right, vh()-box.bottom);
+    return pos;
+  }
+  /* 用 setTimeout 而不是 requestAnimationFrame：无头浏览器里 rAF 常常不推进（探针就没法验），
+     而且标签页被切到后台时 rAF 会停、setTimeout 不会。到位就自己停，不会空转。 */
+  var WALK_DT=16;                           /* 步进标称间隔（毫秒） */
+  function stepGlide(){
+    tid=0;
+    if(!goal) return;
+    var now=NOW();
+    var dt=Math.min(0.05,Math.max(0.008,(now-(lastStepAt||(now-WALK_DT)))/1000));   /* 用实际经过的时间 */
+    lastStepAt=now;
+    var cur=currentPos();
+    if(!isFinite(cur.r)||!isFinite(cur.b)||!isFinite(goal.r)||!isFinite(goal.b)||!isFinite(speed)){
+      stopGlide(); return;                    /* 出过：NaN 让"到站"永远不成立，16ms 定时器链一直挂下去 */
+    }
+    var dr=goal.r-cur.r, db=goal.b-cur.b;
+    var dist=Math.sqrt(dr*dr+db*db);
+    var step=Math.min(speed*dt,dist);         /* 按实际时间走；最后一帧正好走到目标，既不弹也无"死区" */
+    if(dist<=step||dist<1.5){
+      var g=goal; goal=null;
+      moveTo(g.r,g.b,true);                   /* 落点用目标本身，别用本帧起点（否则总差一个步长，最多 150px） */
+      poseRestSoon();                         /* 到站先保持走姿 280ms，别立刻换回正面（否则会来回闪） */
+      return;
+    }
+    var k=step/dist;
+    /* 步频跟着速度走：走得快，摆手迈步也快（walk 关键帧的时长由 --walkdur 控制） */
+    if(petEl) petEl.style.setProperty('--walkdur',(Math.min(0.8,Math.max(0.28,60/Math.max(20,speed)+0.15))).toFixed(2)+'s');
+    if(poseT){ window.clearTimeout(poseT); poseT=0; }        /* 又动起来了：撤销"即将换回正面" */
+    setCls(fig,'moving',true); petFace(dr);        /* 运动中：侧身 + 走路动作（见 practice.css 的 walk 关键帧） */
+    pos={r:cur.r+dr*k, b:cur.b+db*k};
+    applyPos(); flipCheck();
+    tid=window.setTimeout(stepGlide,WALK_DT);
+  }
+  /* speedHint 给了就用它（溜达=固定的慢速）；没给就是跟随：
+     速度随剩余距离增长（基础 FSPEED 保证"咬得住光标"，增益负责"快速接近"，FMAX 封顶保证不像瞬移）。
+     两个"别"：**别用指数衰减插值**（前三帧就把大部分距离吃掉，看着像瞬移）；
+     也别用"每帧固定像素"（setTimeout 的实际间隔会抖 → 速度不匀）。 */
+  function glideTo(t,speedHint){
+    if(!t) return;
+    if(REDUCE){ goal=null; moveTo(t.r,t.b,true); return; }   /* 开了"减少动态效果"就直接归位，不飘 */
+    var cur=currentPos();
+    var d0=Math.sqrt(Math.pow(t.r-cur.r,2)+Math.pow(t.b-cur.b,2));
+    speed=speedHint||followSpeed(d0);
+    goal=t;
+    if(poseT){ window.clearTimeout(poseT); poseT=0; }
+    /* 只有"启动一次新滑翔"才重置时间基准。飞行中每次 mousemove 都重置的话，
+       dt 会变成"距上一次 mousemove 的时间"，跟随会比设定速度慢（实测只剩 70%）。 */
+    if(!tid){ lastStepAt=NOW(); tid=window.setTimeout(stepGlide,WALK_DT); }
+  }
+  /* 停下 = 停定时器 + 清目标 + **把姿态复原**。
+     少了最后一步就会出现"锁定侧身"：开菜单/切模式/开始拖动都会走这里，
+     姿态不复原的话侧面图会一直挂着，切回"原地不动"也不正身。 */
+  var poseT=0;
+  function stopGlide(){
+    goal=null;
+    if(tid){ window.clearTimeout(tid); tid=0; }
+    if(poseT){ window.clearTimeout(poseT); poseT=0; }
+    setCls(fig,'moving',false); petFace(null);
+  }
+  /* 姿态迟滞：走到头先别马上换回正面站姿，等 280ms 看是不是又要走
+     （跟随鼠标时"停一下再动"很频繁，立刻换回正面就会来回闪） */
+  function poseRestSoon(){
+    if(poseT) window.clearTimeout(poseT);
+    poseT=window.setTimeout(function(){
+      poseT=0;
+      if(!goal){ setCls(fig,'moving',false); petFace(null); }
+    },280);
+  }
+
+  /* 「自己溜达」的一次决策：要不要走、往哪走。参数都是活的（面板里改完立刻生效） */
+  function roamTick(){
+    if(!kind||!store.ui.pet||dragging||menuOpen||panelOpen||REDUCE||mode!=='roam') return;
+    if(goal||NOW()-lastAct<ROAM.idle) return;                      /* 用户还在动 / 我还没到位，就不动 */
+    var box=figBox(), W=box.width, H=box.height;
+    var maxR=Math.max(1,vw()-W-16), maxB=Math.max(1,vh()-H-16);
+    var reach=Math.max(40,Math.min(ROAM.reach,Math.min(vw(),vh())*0.9));
+    var cur=currentPos();
+    var tr=cur.r+(Math.random()*2-1)*reach, tb=cur.b+(Math.random()*2-1)*reach;
+    glideTo(clampPos(Math.min(maxR,Math.max(8,tr)), Math.min(maxB,Math.max(8,tb))), ROAM.speed);
+  }
+
+  /* ---- 拖动 / 单击 / 双击 / 右键菜单 ---- */
+  var dragging=null, tapTimer=null, pressT=null, menuOpen=false, panelOpen=false, menu=null, panel=null, lastAct=NOW();
+  function point(e){
+    if(e.touches&&e.touches.length) return {x:e.touches[0].clientX,y:e.touches[0].clientY};
+    if(e.changedTouches&&e.changedTouches.length) return {x:e.changedTouches[0].clientX,y:e.changedTouches[0].clientY};
+    if(e.clientX!=null) return {x:e.clientX,y:e.clientY};
+    return null;
+  }
+  function onDown(node,fn,opt){
+    if(!node) return;
+    if(window.PointerEvent) node.addEventListener('pointerdown',fn,opt);
+    else { node.addEventListener('mousedown',fn,opt); node.addEventListener('touchstart',fn,opt); }
+  }
+  function onMove(node,fn,opt){
+    if(!node) return;
+    if(window.PointerEvent) node.addEventListener('pointermove',fn,opt);
+    else { node.addEventListener('mousemove',fn,opt); node.addEventListener('touchmove',fn,opt||{passive:false}); }
+  }
+  function onUp(node,fn,opt){
+    if(!node) return;
+    if(window.PointerEvent){ node.addEventListener('pointerup',fn,opt); node.addEventListener('pointercancel',fn,opt); }
+    else { node.addEventListener('mouseup',fn,opt); node.addEventListener('touchend',fn,opt); node.addEventListener('touchcancel',fn,opt); }
+  }
+  function petStart(x,y,touch){
+    if(!kind||!store.ui.pet) return;
+    if(dragging) return;                         /* 已经在拖了：第二根手指/重复 pointerdown 不许重入（会长按计时器泄漏） */
+    var box=figBox();
+    dragging={dx:box.right-x, dy:box.bottom-y, sx:x, sy:y, lx:x, moved:false};
+    /* 顺序要紧：先"停"（清目标 + 姿态归零），再摆出"被拖着走"的姿态；
+       反过来的话 stopGlide 会把刚设好的 moving 又清掉，拖动时就不侧身了。 */
+    stopGlide();
+    setCls(fig,'moving',true);                   /* 拖着走 = 侧身 + 走路动作，跟移动方向一致 */
+    setCls(petEl,'dragging',true);
+    closeMenu();
+    if(touch) pressT=setTimeout(function(){      /* 手机上长按 = 右键 */
+      if(dragging&&!dragging.moved){ dragging.moved=true; openMenu(); }
+    },550);
+  }
+  function petMove(x,y){
+    if(!dragging) return;
+    if(menuOpen) return;                         /* 菜单挂在形象上：菜单开着就别动，否则菜单跟着跑（长按开菜单后继续滑、拖动中右键都会到这） */
+    if(Math.abs(x-dragging.sx)+Math.abs(y-dragging.sy)>5){
+      dragging.moved=true;
+      if(pressT){ clearTimeout(pressT); pressT=null; }
+    }
+    petFace(dragging.lx-x);        /* 参数是 Δr：r 变大 = 往左走 */
+    dragging.lx=x;
+    moveTo(vw()-(x+dragging.dx), vh()-(y+dragging.dy), true);
+  }
+  function petEnd(cancelled){
+    if(!dragging) return;
+    var moved=dragging.moved;
+    if(cancelled){                               /* 手势被系统取消（来电/边缘手势/元素被移除）：当作没发生过，
+                                                    否则"单击 + 一次被取消的手势"会凑成双击、误换模式还写进存盘 */
+      dragging=null;
+      if(pressT){ clearTimeout(pressT); pressT=null; }
+      setCls(petEl,'dragging',false);
+      if(poseT){ window.clearTimeout(poseT); poseT=0; }
+      setCls(fig,'moving',false); petFace(null);
+      return;
+    }
+    dragging=null;
+    if(pressT){ clearTimeout(pressT); pressT=null; }
+    setCls(petEl,'dragging',false);
+    if(poseT){ window.clearTimeout(poseT); poseT=0; }
+    setCls(fig,'moving',false); petFace(null);
+    if(moved){
+      if(pos){ store.ui.petPos={r:Math.round(pos.r),b:Math.round(pos.b)}; save(); }
+      return;
+    }
+    /* 没动 = 一次点击。注意：pointerdown 里 preventDefault 之后 click 事件不一定来，
+       所以单击/双击都自己判，别跟原生 click 混用（混用会一次点击触发两回）。 */
+    if(tapTimer){ clearTimeout(tapTimer); tapTimer=null; cycleMode(); }
+    else tapTimer=setTimeout(function(){ tapTimer=null; poke(); },300);
+  }
+  function poke(){
+    if(!store.ui.pet) return;
+    var s=stats();
+    if(s.wrong>0) bubbleSay(lineOf('wrongN',{n:s.wrong}),true);
+    else bubbleSay(lineOf(s.done===0?'empty':'fine'),true);
+  }
+  function cycleMode(){
+    var keys=Object.keys(MODES).filter(function(k){ return !(REDUCE&&k==='roam'); });
+    var i=keys.indexOf(mode);
+    setMode(keys[(i+1)%keys.length]);
+  }
+  function setMode(m){
+    if(!MODES[m]) m='stay';
+    mode=m; store.ui.petMode=m; save();
+    lastAct=NOW();
+    stopGlide();                            /* 换模式先刹车，避免"刚选完就又被拖走" */
+    markMenu();
+    bubbleSay(lineOf('modeSay',{m:modeLabel(m)})+(LINES.modeTail?LINES.modeTail[m]||'':''),true);
+  }
+  function openMenu(){
+    if(!HAS_PET||!kind) return;
+    closePanel();
+    /* 菜单只建一次，而"我放的图片"这一项取决于建菜单那一刻 hasImg ——
+       如果用户在图片还没探测完时先开过菜单，之后图来了也永远看不到这一项（实测切不回去）。 */
+    if(menu&&menu.getAttribute('data-hasimg')!==String(!!hasImg)){
+      if(menu.parentNode) menu.parentNode.removeChild(menu);
+      menu=null;
+    }
+    buildMenu(); markMenu();
+    menuOpen=true; setCls(petEl,'menuon',true);
+    stopGlide();     /* 关键：菜单是挂在形象上的，形象一动菜单就跑——打开菜单必须先把它钉住 */
+    placeMenu();
+  }
+  function openPanel(){
+    if(!HAS_PET||!kind) return;
+    closeMenu();
+    buildPanel(); fillPanel();
+    panelOpen=true; setCls(petEl,'panelon',true);
+    stopGlide();                            /* 和菜单同理：面板开着就把形象钉住，否则滑块追不到 */
+    placePop(panel);
+  }
+  function closePanel(){ if(HAS_PET) setCls(petEl,'panelon',false); panelOpen=false; }
+  function buildPanel(){
+    if(panel||!HAS_PET) return;
+    panel=el('div','petpanel');
+    panel.innerHTML=
+      '<div class="pp-h"><span>溜达设置</span><button type="button" class="pp-x" data-pp="close" aria-label="关闭">×</button></div>'
+      +'<div class="pp-row"><span>跟随速度（跟鼠标）</span><b id="pp-follow-v">—</b></div>'
+      +'<input type="range" id="pp-follow" min="200" max="3000" step="50" aria-label="跟随鼠标的速度，单位像素每秒">'
+      +'<div class="pp-row"><span>走路速度 / 步频（溜达）</span><b id="pp-speed-v">—</b></div>'
+      +'<input type="range" id="pp-speed" min="30" max="400" step="10" aria-label="走路速度，单位像素每秒">'
+      +'<div class="pp-row"><span>每段走多远</span><b id="pp-reach-v">—</b></div>'
+      +'<input type="range" id="pp-reach" min="60" max="420" step="10" aria-label="每段距离，单位像素">'
+      +'<div class="pp-row"><span>间隔（多久走一段）</span><b id="pp-tick-v">—</b></div>'
+      +'<input type="range" id="pp-tick" min="1000" max="15000" step="500" aria-label="溜达间隔，单位毫秒">'
+      +'<div class="pp-row"><span>停手多久才开始</span><b id="pp-idle-v">—</b></div>'
+      +'<input type="range" id="pp-idle" min="1000" max="20000" step="500" aria-label="停手多久开始溜达，单位毫秒">'
+      +'<div class="chips"><button type="button" data-preset="quiet">安静</button>'
+      +'<button type="button" data-preset="normal">标准</button>'
+      +'<button type="button" data-preset="lively">活泼</button>'
+      +'<button type="button" data-pp="reset">恢复默认</button></div>'
+      +'<p class="pp-note" id="pp-note"></p>';
+    petEl.appendChild(panel);
+    panel.addEventListener('click',function(e){
+      var b=e.target;
+      while(b&&b!==panel&&b.tagName!=='BUTTON') b=b.parentNode;
+      if(!b||b===panel||b.tagName!=='BUTTON') return;
+      var pp=b.getAttribute('data-pp'), ps=b.getAttribute('data-preset');
+      if(pp==='close'){ closePanel(); }
+      else if(pp==='reset'){ store.ui.petRoam=null; store.ui.petFollow=null; save(); roamLoad(); followLoad(); startRoamTimer(); fillPanel(); }
+      else if(ps){
+        var P1={ quiet:{speed:70,reach:90,tick:8000,idle:12000},
+                 normal:{speed:ROAM_DEF.speed,reach:ROAM_DEF.reach,tick:ROAM_DEF.tick,idle:ROAM_DEF.idle},
+                 lively:{speed:220,reach:300,tick:1500,idle:1500} }[ps];
+        if(P1){ ROAM.speed=P1.speed; ROAM.reach=P1.reach; ROAM.tick=P1.tick; ROAM.idle=P1.idle;
+                store.ui.petRoam={speed:ROAM.speed,reach:ROAM.reach,tick:ROAM.tick,idle:ROAM.idle};
+                save(); startRoamTimer(); fillPanel(); }
+      }
+    });
+    var fr=panel.querySelector('#pp-follow');
+    if(fr) fr.addEventListener('input',function(){
+      FOLLOW.speed=+fr.value;
+      store.ui.petFollow={speed:FOLLOW.speed};
+      save(); fillPanel(true);
+    });
+    ['speed','reach','tick','idle'].forEach(function(k){
+      var r=panel.querySelector('#pp-'+k);
+      if(r) r.addEventListener('input',function(){
+        ROAM[k]=+r.value;
+        store.ui.petRoam={speed:ROAM.speed,reach:ROAM.reach,tick:ROAM.tick,idle:ROAM.idle};
+        save();
+        if(k==='tick') startRoamTimer();
+        fillPanel(true);
+      });
+    });
+  }
+  function secs(ms){ return (Math.round(ms/100)/10)+' s'; }
+  function fillPanel(keepFocus){
+    if(!panel) return;
+    var set=function(id,v,txt){ var e=panel.querySelector(id); if(e) e.textContent=txt;
+                                var r=panel.querySelector(id.replace('-v','')); if(r&&!keepFocus) r.value=String(v); };
+    var fr=panel.querySelector('#pp-follow');
+    if(fr&&!keepFocus) fr.value=String(FOLLOW.speed);
+    set('#pp-follow-v',FOLLOW.speed,FOLLOW.speed+' px/s');
+    set('#pp-speed-v',ROAM.speed,ROAM.speed+' px/s');
+    set('#pp-reach-v',ROAM.reach,ROAM.reach+' px');
+    set('#pp-tick-v',ROAM.tick,secs(ROAM.tick));
+    set('#pp-idle-v',ROAM.idle,secs(ROAM.idle));
+    var n=panel.querySelector('#pp-note');
+    if(n) n.textContent=(mode==='roam'
+      ? '改完立刻生效。跟随速度只影响「跟着鼠标」；走路速度决定溜达的快慢与步频。'
+      : (mode==='follow' ? '改完立刻生效。「跟随速度」调大＝跟得更紧、更不容易落后。'
+                         : '这些设置要用的时候才生效：跟随速度管「跟着鼠标」，其余管「自己溜达」。'));
+  }
+  /* 弹出层（菜单、溜达设置面板）都挂在形象上（绝对定位），默认朝上展开。形象离顶边太近时会顶出屏幕，
+     里面的按钮就点不到了（elementFromPoint 返回 null）。这里按剩余空间决定朝上/朝下，
+     两边都放不下就限高滚动，横向贴左时也夹一下。 */
+  function placeMenu(){ placePop(menu); }
+  function placePop(el){
+    if(!el) return;
+    el.style.top=''; el.style.bottom=''; el.style.left=''; el.style.right=''; el.style.maxHeight='';
+    var pr=figBox(), vph=vh(), h=el.offsetHeight||0, GAP=10, PAD=8;
+    var menu=el;                                   /* 下面沿用同一套夹取逻辑 */
+    var above=pr.top-GAP, below=vph-pr.bottom-GAP;
+    if(h<=above-PAD){ /* 朝上放得下：保持默认 */ }
+    else if(h<=below-PAD){ menu.style.top='calc(100% + '+GAP+'px)'; menu.style.bottom='auto'; }
+    else if(below>above){                                  /* 两边都不够：选空间大的一边 + 限高滚动 */
+      menu.style.top='calc(100% + '+GAP+'px)'; menu.style.bottom='auto';
+      menu.style.maxHeight=Math.max(60,below-PAD)+'px';
+    }else{
+      menu.style.maxHeight=Math.max(60,above-PAD)+'px';
+    }
+    var mr=menu.getBoundingClientRect();
+    if(mr.left<PAD){ menu.style.left='0'; menu.style.right='auto'; }   /* 贴左时改成向右展开 */
+    /* 兜底①：不许比可见视口还高（触屏上元素更大，矮视口里容易撞这条） */
+    if(vph-2*PAD>0 && (el.offsetHeight||0)>vph-2*PAD) el.style.maxHeight=(vph-2*PAD)+'px';
+    /* 兜底②：上沿不许为负 —— 可用空间比 max-height 还小时（横屏/分屏/查看器矮 iframe），
+       原来那句 Math.max(140,…) 的下限会把第一项顶到屏幕外（实测上沿 -40px）。 */
+    var rr=el.getBoundingClientRect();
+    if(rr.top<PAD) el.style.maxHeight=Math.max(60,(el.offsetHeight||0)-(PAD-rr.top))+'px';
+  }
+  function closeMenu(){ if(HAS_PET) setCls(petEl,'menuon',false); menuOpen=false; }
+  function buildMenu(){
+    if(menu||!HAS_PET) return;
+    menu=el('div','petmenu');
+    var h='<div class="mt">模式</div><div class="mrow">';
+    Object.keys(MODES).forEach(function(k){
+      if(REDUCE&&k==='roam') return;                 /* 系统开了"减少动态效果"就不给自动溜达 */
+      h+='<button type="button" data-m="'+k+'">'+modeLabel(k)+'</button>';
+    });
+    h+='</div>';
+    h+='<button type="button" data-a="roamset">溜达设置…</button>';
+    h+='<div class="mt">大小</div><div class="mrow"><button type="button" data-s="0.78">小</button>'
+      +'<button type="button" data-s="1">中</button><button type="button" data-s="1.25">大</button></div>';
+    h+='<div class="mt">形象</div>';
+    if(FISH.front) h+='<button type="button" data-art="fish">内置大肥鱼</button>';
+    if(hasImg) h+='<button type="button" data-art="image">我放的图片</button>';
+    h+='<div class="mt">别的</div><button type="button" data-a="home">回到右下角</button>'
+      +'<button type="button" data-a="hide">先藏起来</button>';
+    menu.innerHTML=h;
+    menu.setAttribute('data-hasimg',String(!!hasImg));
+    petEl.appendChild(menu);
+    menu.addEventListener('click',function(e){
+      var b=e.target;
+      while(b&&b!==menu&&b.tagName!=='BUTTON') b=b.parentNode;
+      if(!b||b===menu||b.tagName!=='BUTTON') return;
+      var m=b.getAttribute('data-m'), s=b.getAttribute('data-s'), a=b.getAttribute('data-a'),
+          art=b.getAttribute('data-art');
+      if(m){ setMode(m); closeMenu(); }
+      else if(s){ petk=parseFloat(s)||1; store.ui.petSize=petk; save(); applySize(); reflow(); markMenu(); }
+      else if(a==='home'){
+        store.ui.petPos=null; save();
+        glideTo(clampPos(14,14),WSPEED);      /* 走回右下角，别"啪"地跳过去（位置记录到站后会写成 14,14） */
+        closeMenu();
+      }
+      else if(art){ setArt(art); closeMenu(); }
+      else if(a==='roamset'){ openPanel(); }
+      else if(a==='hide'){ closeMenu(); setPet(false); }
+    });
+  }
+  function markMenu(){
+    if(!menu) return;
+    Array.prototype.forEach.call(menu.querySelectorAll('button'),function(b){
+      if(b.getAttribute('data-m')) setCls(b,'on',b.getAttribute('data-m')===mode);
+      if(b.getAttribute('data-s')) setCls(b,'on',Math.abs(parseFloat(b.getAttribute('data-s'))-petk)<0.01);
+      if(b.getAttribute('data-art')) setCls(b,'on',b.getAttribute('data-art')===kind);
+    });
+  }
+  try{
+    onDown(fig,function(e){
+      if(e.button!=null&&e.button!==0) return;                       /* 只认左键与触摸 */
+      var p=point(e); if(!p) return;
+      var touch=(e.pointerType==='touch')||String(e.type).indexOf('touch')===0;
+      if(e.cancelable) e.preventDefault();
+      petStart(p.x,p.y,touch);
+    });
+    onMove(document,function(e){
+      if(!dragging) return;
+      var p=point(e); if(!p) return;
+      petMove(p.x,p.y);
+      if(e.cancelable&&e.type==='touchmove') e.preventDefault();      /* 兜底：别让页面跟着手指滚 */
+    },{passive:false});
+    onUp(document,function(e){ petEnd(!!e&&String(e.type).indexOf('cancel')>=0); });
+    if(fig) fig.addEventListener('contextmenu',function(e){ e.preventDefault(); openMenu(); });
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape'||e.keyCode===27){ closeMenu(); closePanel(); }
+    });
+    onDown(document,function(e){                                     /* 点别处关菜单/面板 */
+      if(!petEl||petEl.contains(e.target)) return;
+      if(menuOpen) closeMenu();
+      if(panelOpen) closePanel();
+    },true);
+    /* 跟随鼠标 / 自己溜达：都得先知道"用户在不在动手" */
+    ('mousemove scroll keydown touchstart pointerdown').split(' ').forEach(function(ev){
+      document.addEventListener(ev,function(){ lastAct=NOW(); },true);
+    });
+    document.addEventListener('mousemove',function(e){
+      if(!kind||!store.ui.pet||dragging||menuOpen||panelOpen||mode!=='follow') return;  /* 菜单/面板开着就别动，不然点不着 */
+      var box=figBox();
+      /* 跟光标保持一段偏移，否则形象会一直压在光标下面、把点击都吃掉 */
+      glideTo(clampPos(vw()-(e.clientX+30+box.width), vh()-(e.clientY+30+box.height)));
+    });
+    roamTick(); startRoamTimer();
+    window.addEventListener('resize',function(){
+      if(goal) goal=clampPos(goal.r,goal.b);
+      if(pos) moveTo(pos.r,pos.b,true); else flipCheck();
+      /* 平板横竖屏切换、分屏改宽度时，开着的弹出层要跟着重新定位，否则会留在屏幕外 */
+      if(menuOpen) placeMenu();
+      if(panelOpen) placePop(panel);
+    });
+    if(window.orientation!==undefined){                 /* 老 iOS 的横竖屏事件（resize 有时不触发） */
+      window.addEventListener('orientationchange',function(){
+        setTimeout(function(){ if(menuOpen) placeMenu(); if(panelOpen) placePop(panel); },260);
+      });
+    }
+  }catch(e){ console.error('陪练交互初始化失败：',e); }
+
+  /* ---------------- 卡片渲染 ---------------- */
+  var LETTERS=['A','B','C','D','E','F'];
+  var lvHosts={};
+  Array.prototype.forEach.call(document.querySelectorAll('.qlist'),function(h){ lvHosts[h.getAttribute('data-lv')]=h; });
+
+  function lvLabel(lv){ return 'L'+lv; }
+
+  function applyState(rec,st){
+    /* st: {picked:[], ok:bool, val:''} */
+    rec.answered=true; rec.ok=st.ok;
+    rec.art.classList.add('done');
+    rec.art.classList.add(st.ok?'right':'wrongq');
+    rec.mark.textContent=st.ok?'✓ 答对':'✗ 答错';
+    rec.mark.className='qmark '+(st.ok?'ok':'no');
+    rec.fb.className='fb on '+(st.ok?'ok':'no');
+    var hasSol=!!(rec.q.solHtml||rec.q.sol);
+    var extra;
+    if(!st.ok&&rec.kind==='num'){
+      var a=rec.q.ansText?rec.q.ansText[0]:fmt(rec.q.ans);
+      var unreadable=!rec.q.ansText&&!isFinite(parseNum(st.val));
+      if(unreadable){
+        extra='<span class="sub">这个写法看不懂：<b>只认一个数字</b>（可以带单位，如 <span class="fx">1.06 T</span>、'
+            +'<span class="fx">2.51e-4</span>），别写算式或多余的数。正确答案：<b>'+a+'</b></span>';
+        rec.fb.innerHTML='<span>没法判分。</span>'+extra;
+        return;
+      }
+      extra='<span class="sub">正确答案：<b>'+a+'</b>'
+        +((rec.q.unit&&!rec.q.ansText)?(' '+rec.q.unit):'')
+        +(hasSol?'。解析已经展开，读完点「重做本题」再自己写一遍。'
+                :'。点「重做本题」再自己算一遍，算对了才算过。')+'</span>';
+    }else if(st.ok){
+      /* ⚠️ 这里的文案要**分题型**：填数值题**没有选项**，说"绿色那一项"是错的话术
+         —— 学生会回头去找一个根本不存在的选项。
+         实测：大题里的填数值步答对、且这一步没写解析时，页面上出现的就是那句。
+         （答**错**的数值题在上面那一支就处理掉了，所以在下面那两个分支里说"绿色那一项"是对的。） */
+      extra='<span class="sub">'+(hasSol
+        ?'解析在下面，可以顺手复核一下自己的思路。'
+        :(rec.kind==='num'
+          ?'算对了。点「重做本题」再自己算一遍也行，稳一稳。'
+          :'绿色那一项下面写的就是它的道理。'))+'</span>';
+    }else if(hasSol){
+      extra='<span class="sub">解析已经展开——每一项都写了「它错在哪」，看完点「重做本题」再来一次。</span>';
+    }else{
+      extra='<span class="sub">绿色那一项就是对的，它下面写了道理；你选的这一项也标出了错在哪。看完点「重做本题」再来一次。</span>';
+    }
+    rec.fb.innerHTML=(st.ok?'<span>答对了。</span>':'<span>还不对。</span>')+extra;
+    if(rec.kind==='choice'){
+      if(rec.submit) rec.submit.disabled=true;   /* 多选提交后按钮也该灰掉（虽然重复点不会重复计分） */
+      rec.btns.forEach(function(b,i){
+        b.el.disabled=true;
+        var chosen=(st.picked||[]).indexOf(i)>=0;
+        b.el.classList.toggle('picked',chosen);
+        b.why.classList.add('on');
+        var opt=rec.q.opts[i];
+        if(opt.ok) b.el.classList.add('ok');
+        else if(chosen) b.el.classList.add('bad');
+        /* 只显示"正确项的解释"和"你选错那项的解释"，减少噪音 */
+        b.why.classList.toggle('on', !!opt.ok || chosen);
+      });
+    } else if(rec.kind==='num'){
+      rec.input.disabled=true; rec.submit.disabled=true;
+      rec.input.classList.add(st.ok?'okc':'badc');
+      rec.input.value=st.val||'';         /* 答对也回填：不然刷新后输入框空白、卡面却写着"✓ 答对" */
+    }
+    if(rec.sol) rec.sol.classList.add('on');
+  }
+
+  function lockPoint(rec,st){
+    store.pts[rec.id]={answered:true,ok:!!st.ok,picked:st.picked||[],val:st.val||''};
+    save(); applyState(rec,store.pts[rec.id]); paintProgress();
+    if(onlyWrong) applyFilter();          /* 「只看错题」开着时，刚答对的这道要从列表里消失 */
+    /* 关卡/全章完成提示 */
+    if(st.ok){
+      sayL('right',null,true);
+    }else{
+      sayL('wrong');
+    }
+    /* 整关 / 整章过完了再吱一声（同一关只说一次） */
+    var s2=stats(), allDone=true, hit=null, k2;
+    for(k2 in s2.byLv){ if(s2.byLv[k2].d!==s2.byLv[k2].n) allDone=false; else if(!saidDone[k2]) hit=k2; }
+    if(allDone&&!saidAll){ saidAll=true; setTimeout(function(){ sayL('all',null,true); },900); }
+    else if(hit!=null){ saidDone[hit]=true; setTimeout(function(){ sayL('done',null,true); },900); }
+  }
+  var saidDone={}, saidAll=false;
+
+  function resetPoint(rec){
+    delete store.pts[rec.id];
+    save();
+    rec.answered=false; rec.ok=null;
+    rec.art.classList.remove('done','right','wrongq');
+    rec.mark.textContent=''; rec.mark.className='qmark';
+    rec.fb.className='fb'; rec.fb.innerHTML='';
+    if(rec.sol) rec.sol.classList.remove('on');
+    if(rec.kind==='choice'){
+      rec.btns.forEach(function(b){ b.el.disabled=false; b.el.classList.remove('picked','ok','bad'); b.why.classList.remove('on'); });
+      if(rec.submit) rec.submit.disabled=true;      /* 多选复位后提交键也要回到禁用 */
+    }else if(rec.kind==='num'){
+      rec.input.disabled=false; rec.submit.disabled=false; rec.input.classList.remove('okc','badc');
+    }
+    paintProgress();
+    if(onlyWrong) applyFilter();          /* 重做后它又变回"未作答"，错题列表要跟着刷新 */
+  }
+
+  function buildPoint(q,host,label,isPart){
+    var art=el('article','q'); art.id='q-'+q.id;
+    if(isPart) art.style.paddingTop='0';
+    var head=el('div','qhead');
+    head.appendChild(el('span','qno',label));
+    head.appendChild(el('span','qtype',
+      q.type==='single'?'单选':q.type==='multi'?'多选':'填数值'));
+    var mark=el('span','qmark',''); head.appendChild(mark);
+    art.appendChild(head);
+    if(q.stem!==undefined&&q.stem!=='') art.appendChild(el('p','qstem',q.stem));
+
+    var rec={id:q.id,q:q,lv:q.lv,art:art,mark:mark,PTS:null};
+
+    if(q.type==='single'||q.type==='multi'){
+      rec.kind='choice';
+      var wrap=el('div','opts');
+      rec.btns=[];
+      var picked=[];
+      q.opts.forEach(function(o,i){
+        var b=el('button','opt');
+        b.type='button';
+        b.appendChild(el('span','badge',LETTERS[i]));
+        var body=el('span','obody');
+        body.appendChild(el('span','otext',o.t));
+        var why=el('span','why',o.why||'');
+        body.appendChild(why);
+        b.appendChild(body);
+        wrap.appendChild(b);
+        rec.btns.push({el:b,why:why});
+        b.addEventListener('click',function(){
+          if(rec.answered) return;
+          if(q.type==='single'){
+            var ok=!!o.ok;
+            if(ok) b.classList.add('picked');
+            lockPoint(rec,{picked:[i],ok:ok});
+          }else{
+            b.classList.toggle('picked');
+            picked=q.opts.map(function(_,k){return k;}).filter(function(k){ return rec.btns[k].el.classList.contains('picked'); });
+            submit.disabled=picked.length===0;
+          }
+        });
+      });
+      art.appendChild(wrap);
+      var submit=null;
+      if(q.type==='multi'){
+        submit=el('button','btn','提交答案'); submit.type='button'; submit.disabled=true; rec.submit=submit;
+        var row=el('div','qfoot'); row.appendChild(submit); art.appendChild(row);
+        submit.addEventListener('click',function(){
+          if(rec.answered) return;
+          /* 按 DOM 现况重算（重做本题之后闭包里的 picked 是旧的） */
+          picked=q.opts.map(function(_,k){return k;}).filter(function(k){ return rec.btns[k].el.classList.contains('picked'); });
+          if(!picked.length){ submit.disabled=true; return; }   /* 一个都没选：不算作答 */
+          var ok=q.opts.every(function(o,k){
+            var sel=rec.btns[k].el.classList.contains('picked');
+            return sel===!!o.ok;
+          });
+          lockPoint(rec,{picked:picked,ok:ok});
+        });
+      }
+    } else if(q.type==='num'){
+      rec.kind='num';
+      var row2=el('div','numrow');
+      var inp=document.createElement('input'); inp.type='text'; inp.placeholder='填数值'; inp.setAttribute('aria-label','答案');
+      var unit=el('span','unit',q.unit||'');
+      var sub=el('button','btn','对答案'); sub.type='button';
+      row2.appendChild(inp); if(q.unit) row2.appendChild(unit); row2.appendChild(sub);
+      art.appendChild(row2);
+      var doNum=function(){
+        if(rec.answered) return;
+        var txt=inp.value.trim();
+        if(!txt){ inp.focus(); return; }
+        var ok;
+        if(q.ansText){
+          ok=q.ansText.some(function(t){ return t.toLowerCase().replace(/[\s·]/g,'')===txt.toLowerCase().replace(/[\s·]/g,''); });
+        }else{
+          var v=parseNum(txt), tol=(q.tol!=null)?q.tol:Math.max(Math.abs(q.ans)*0.02,1e-12);
+          ok=isFinite(v)&&Math.abs(v-q.ans)<=tol;
+        }
+        lockPoint(rec,{picked:[],ok:ok,val:txt});
+      };
+      sub.addEventListener('click',doNum);
+      inp.addEventListener('keydown',function(e){ if(e.key==='Enter') doNum(); });
+      rec.input=inp; rec.submit=sub;
+    }
+
+    var foot=el('div','qfoot');
+    if(q.hint){
+      var hb=el('button','mini','思路提示'); hb.type='button';
+      foot.appendChild(hb);
+    }
+    var rb=el('button','mini','重做本题'); rb.type='button'; foot.appendChild(rb);
+    if(q.ref){ var a=document.createElement('a'); a.className='link'; a.href=q.ref.h; a.textContent=q.ref.t+' →'; foot.appendChild(a); }
+    art.appendChild(foot);
+
+    var hintBox=null;
+    if(q.hint){
+      hintBox=el('div','box hint','<span class="h">思路提示</span>'+q.hint);
+      art.appendChild(hintBox);
+      art.querySelectorAll('.mini')[0].addEventListener('click',function(){
+        var on=hintBox.classList.toggle('on');
+        if(on) sayL('hint');
+      });
+    }
+    rb.addEventListener('click',function(){ resetPoint(rec); if(hintBox) hintBox.classList.remove('on'); });
+
+    var solHtml=(q.solHtml||q.sol||'');
+    rec.fb=el('div','fb'); art.appendChild(rec.fb);
+    if(solHtml){
+      rec.sol=el('div','box sol','<span class="h">解析</span>'+solHtml);
+      art.appendChild(rec.sol);
+    }else{
+      rec.sol=null;
+    }
+
+    host.appendChild(art);
+    PTS.push({id:q.id,lv:q.lv});
+    var st=store.pts[q.id];
+    if(st&&st.answered) applyState(rec,st);
+    return rec;
+  }
+
+  /* 题库字段写坏时**不许静默**：返回一条人话，页面上一张标红的卡，控制台一条 warn。
+     这些错都是"少写一个字段"的常见手误，以前会让整个渲染循环抛错、后面全失效。 */
+  function badReason(q){
+    if(!q||typeof q!=='object') return '题目不是一个对象';
+    if(!q.id) return '缺 id（id 会当存盘键用）';
+    if(q.type!=='single'&&q.type!=='multi'&&q.type!=='num'&&q.type!=='big')
+      return 'type 写错了：'+(q.type===undefined?'没写':'"'+q.type+'"')+'（只认 single / multi / num / big）';
+    if(q.type==='big'){
+      if(!(q.parts instanceof Array)||!q.parts.length) return '大题缺 parts（或写成了空数组）';
+      /* 小题的 id 是 <大题id>-<步号>，要与普通题一起查重 —— 见渲染循环里的 seenIds */
+      for(var i=0;i<q.parts.length;i++){
+        var p=q.parts[i], r=badReason({id:q.id+'-'+(i+1),type:p&&p.type,opts:p&&p.opts,ans:p&&p.ans,ansText:p&&p.ansText});
+        if(r) return '第 '+(i+1)+' 步：'+r;
+      }
+      return '';
+    }
+    if(q.type==='single'||q.type==='multi'){
+      if(!(q.opts instanceof Array)||q.opts.length<2) return '选项 opts 缺了或不足两个';
+      var okN=0;
+      q.opts.forEach(function(o){ if(o&&o.ok) okN++; });
+      if(!okN) return '没有任何一个选项标了 ok:true（这样学生永远答不对）';
+      if(q.type==='single'&&okN>1) return '单选题却标了 '+okN+' 个正确项（应改用 type:"multi"）';
+      return '';
+    }
+    /* num */
+    if(q.ansText!=null){
+      if(!(q.ansText instanceof Array)||!q.ansText.length) return 'ansText 要写成非空数组（如 ["A/m","A·m⁻¹"]）';
+      return '';
+    }
+    if(typeof q.ans!=='number'||!isFinite(q.ans))
+      return 'ans 必须是数字'+(q.ans===undefined?'（现在没写）':'（现在是 '+JSON.stringify(q.ans)+'；带 ×10⁻⁴ 的写法要写成 2.51e-4）');
+    if(q.tol!=null&&(typeof q.tol!=='number'||!isFinite(q.tol)||q.tol<0)) return 'tol 要是非负数字';
+    return '';
+  }
+  function orphanHost(){
+    var h=document.querySelector('.qlist');
+    return h||null;
+  }
+  function brokenCard(host,q,why){
+    var d=el('div','q broken');
+    d.appendChild(el('p','qstem','<b>这道题题库配置有误，已跳过：</b>'+why));
+    d.appendChild(el('p','lede','题号 '+((q&&q.id)||'(没有 id)')+' —— 请回题库 JSON 把那道题改好（这一题不计入总题数）。'));
+    if(host) host.appendChild(d);
+    return d;
+  }
+
+  function buildCard(q){
+    if(q.type!=='big'){
+      var host=lvHosts[q.lv];
+      if(!host){
+        console.warn('未知关卡（页面里没有 .qlist[data-lv='+q.lv+']），已跳过：',q.id||q);
+        brokenCard(orphanHost(),q,'这道题的 lv='+q.lv+'，但页面里没有对应的题区（.qlist[data-lv='+q.lv+']）');
+        return null;
+      }
+      var n=host.children.length+1;
+      return buildPoint(q,host,'L'+q.lv+'·'+n);
+    }
+    /* 大题：一个壳，里面若干小问 */
+    var host2=lvHosts[q.lv];
+    if(!host2){
+      console.warn('未知关卡（页面里没有 .qlist[data-lv='+q.lv+']），已跳过：',q.id||q);
+      brokenCard(orphanHost(),q,'这道大题的 lv='+q.lv+'，但页面里没有对应的题区');
+      return null;
+    }
+    var grp=el('div','grp'); grp.id='grp-'+q.id;
+    var CN=['一','二','三','四','五','六'];
+    var gh=el('div','qhead');
+    gh.appendChild(el('span','qno','大题'+(CN[q.__idx]||'')));
+    gh.appendChild(el('span','qtype','一步一问'));
+    grp.appendChild(gh);
+    grp.appendChild(el('p','qstem',q.stem));
+    host2.appendChild(grp);
+    var recs=[];
+    q.parts.forEach(function(p,i){
+      var id=q.id+'-'+(i+1);
+      var sub={id:id,type:p.type,lv:q.lv,stem:p.stem,
+        opts:p.opts,ans:p.ans,tol:p.tol,ansText:p.ansText,unit:p.unit,hint:p.hint,sol:p.sol,ref:p.ref};
+      recs.push(buildPoint(sub,grp,'第 '+(i+1)+' 步',true));
+    });
+    return recs;
+  }
+
+  var bigIdx=0, seenIds={};
+  function renderBank(items){
+   items.forEach(function(q){
+    try{
+      q.lv=q.lv==null?0:q.lv;
+      var why=badReason(q);
+      if(why){ console.warn('题库配置有误，已跳过：'+why,q); brokenCard(lvHosts[q.lv]||orphanHost(),q,why); return; }
+      if(seenIds[q.id]){                       /* 重复 id：两题会共用存盘键、一次作答计两分 */
+        var n=2, base=q.id; while(seenIds[base+'-'+n]) n++;
+        console.warn('题库里有重复的 id："'+q.id+'" 已改成 "'+base+'-'+n+'"（否则两题共用存盘键、进度会翻倍）',q);
+        q.id=base+'-'+n;
+      }
+      seenIds[q.id]=1;
+      if(q.type==='big'){
+        /* 大题的小步 id 是自动生成的（<id>-1、<id>-2…），必须一起登记：
+           否则题库里另有一道普通题叫 "big1-1" 时会撞车 —— #s-total 多算一道、
+           答一次计两分，而探针用 getElementById 只会答到第一张，看什么都"正常"。 */
+        for(var bi=0;bi<q.parts.length;bi++){
+          var pid=q.id+'-'+(bi+1);
+          if(seenIds[pid]){
+            console.warn('大题的步号与另一道题 id 撞车："'+pid+'"（已把这道大题的 id 改成唯一值）',q);
+            var bn=2, bbase=q.id; while(seenIds[bbase+'-'+n]||seenIds[bbase+'-x'+bn]) bn++;
+            q.id=bbase+'x'+bn; seenIds[q.id]=1;
+            break;
+          }
+          seenIds[pid]=1;
+        }
+      }
+      if(q.type==='big'){ q.__idx=bigIdx++; }
+      buildCard(q);
+    }catch(e){
+      /* 兜底：任何一道题渲染崩了，也不许把后面的代码（统计/筛选/陪练）带走 */
+      console.error('这道题渲染失败，已跳过：',q&&q.id,e);
+      /* 注意这里也要判空：q 可能是 null（题库里写了 null），
+         以前写成 lvHosts[q.lv] → 在 catch 里再抛一次，异常逃出 forEach，
+         整个收尾（筛选/重置/演示/陪练/统计）全不执行 —— 兜底自己把页面带走了。 */
+      brokenCard((q&&q.lv!=null&&lvHosts[q.lv])||orphanHost(),q,'渲染时抛错：'+(e&&e.message));
+    }
+   });
+  }
+  renderBank(BANK);
+  /* 题库段写在引擎脚本**之后**是最常见的粘贴手误：IIFE 只扫一次 DOM，那几段就整段消失
+     （页面不报错、题也不在）。这里在 DOM 就绪后再扫一遍，只补新出现的那些。 */
+  function scanNewBanks(){
+    var extra=[];
+    Array.prototype.forEach.call(document.querySelectorAll('script[data-bank]'),function(sc){
+      if(sc.__isgSeen) return;
+      sc.__isgSeen=1;
+      try{ var arr=JSON.parse(sc.textContent); if(arr&&arr.length) extra=extra.concat(arr); }
+      catch(e2){ console.error('题库解析失败：',sc.id,e2); }
+    });
+    if(extra.length){
+      try{ console.warn('有 '+extra.length+' 道题写在引擎脚本之后，已补渲染（建议把题库段放到引擎之前）'); }catch(e3){}
+      renderBank(extra);
+      paintProgress(); applyFilter();
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',scanNewBanks);
+  else setTimeout(scanNewBanks,0);
+
+  /* ---------------- 只看错题 / 重置 ---------------- */
+  var onlyWrong=!!store.ui.onlyWrong;          /* 勾选态也存盘（刷新后不丢） */
+  function applyFilter(){
+    /* 按卡片整体处理，保证大题整组同进同出 */
+    Array.prototype.forEach.call(document.querySelectorAll('.qlist > .q, .qlist > .grp'),function(card){      var anyWrong=false;
+      if(card.classList.contains('q')){
+        var st=store.pts[card.id.replace(/^q-/,'')];
+        anyWrong=!!(st&&st.answered&&!st.ok);
+      }else{
+        Array.prototype.forEach.call(card.querySelectorAll('.q[id]'),function(x){
+          var st2=store.pts[x.id.replace(/^q-/,'')];
+          if(st2&&st2.answered&&!st2.ok) anyWrong=true;
+        });
+      }
+      card.classList.toggle('hidden',onlyWrong&&!anyWrong);
+    });
+    if(typeof wrongEmptyNote==='function') wrongEmptyNote();
+  }
+  /* 只看错题时如果一道错题都没有，题库区会整块空白 —— 补一句提示，别让用户以为页面坏了 */
+  function wrongEmptyNote(){
+    var n=document.getElementById('wrongEmpty');
+    var vis=document.querySelectorAll('.qlist > .q:not(.hidden), .qlist > .grp:not(.hidden)').length;
+    if(onlyWrong&&!vis){
+      if(!n){
+        n=el('div','card wrongempty');
+        n.id='wrongEmpty';
+        n.innerHTML='<h4 style="margin-top:0">现在没有错题</h4>'
+          +'<p style="margin-bottom:0">把「只看错题」取消勾选（或在顶部切回「看全部题目」），就能继续做题了。'
+          +'做错的题会自动出现在这里。</p>';
+        var bar=document.querySelector('.bar');
+        if(bar&&bar.parentNode) bar.parentNode.insertBefore(n,bar.nextSibling);
+      }
+    }else if(n&&n.parentNode){ n.parentNode.removeChild(n); }
+  }
+  var owEl=req('onlyWrong');
+  if(owEl) owEl.addEventListener('change',function(e){
+    onlyWrong=e.target.checked; store.ui.onlyWrong=onlyWrong; save(); applyFilter(); wrongEmptyNote();
+    if(onlyWrong) sayL('filter');
+  });
+  var goWrongEl=req('goWrong');
+  if(goWrongEl) goWrongEl.addEventListener('click',function(){
+    document.getElementById('onlyWrong').checked=true; onlyWrong=true; applyFilter();
+    /* 要找"真正可见"的那一张：大题组的 .q 自己没有 .hidden（隐藏加在 .grp 上），
+       直接选 `.qlist .q:not(.hidden)` 会命中藏在隐藏组里的卡，滚过去什么也看不见。 */
+    var target=null;
+    Array.prototype.forEach.call(document.querySelectorAll('.qlist > .q:not(.hidden),.qlist > .grp:not(.hidden)'),function(c){
+      if(!target) target=c;
+    });
+    if(target){
+      var top=target.getBoundingClientRect().top+window.scrollY-90;
+      try{ window.scrollTo({top:top}); }catch(e){ window.scrollTo(0,top); }
+    }
+  });
+  var goAllEl=req('goAll');
+  if(goAllEl) goAllEl.addEventListener('click',function(){
+    document.getElementById('onlyWrong').checked=false; onlyWrong=false; applyFilter(); wrongEmptyNote();
+  });
+  var resetArmed=false, resetT=null;
+  var resetEl=req('resetAll');
+  function disarmReset(){
+    if(!resetArmed) return;
+    resetArmed=false; clearTimeout(resetT);
+    var b=document.getElementById('resetAll'); if(b) b.textContent='清空重来';
+  }
+  /* 点了别的按钮（或在别处点了任何东西）就不该再"第二下直接清空" */
+  document.addEventListener('click',function(e){
+    var b=document.getElementById('resetAll');
+    if(resetArmed&&e.target!==b&&!(b&&b.contains(e.target))) disarmReset();
+  },true);
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'||e.keyCode===27) disarmReset(); });
+  if(resetEl) resetEl.addEventListener('click',function(){
+    var b=resetEl;
+    /* 不用 window.confirm：不少"HTML 查看器"App 没实现 JS 对话框委托，confirm 永远返回 false，
+       表现就是"点了清空重来毫无反应"（Safari 里正常，所以只在这类宿主里才暴露）。
+       改成页内两步确认，也不需要 location.reload（有的宿主不让重载页面）。 */
+    if(!resetArmed){
+      resetArmed=true;
+      b.textContent='真的清空？再点一次';
+      clearTimeout(resetT);
+      resetT=setTimeout(function(){
+        resetArmed=false; b.textContent='清空重来';
+      },4000);
+      return;
+    }
+    clearTimeout(resetT); resetArmed=false; b.textContent='清空重来';
+    store.pts={}; save();
+    saidDone={}; saidAll=false;                  /* 播报记忆也要清：否则清空后重答全对时"又清一关/整章通关"再也不说 */
+    /* 逐题复位：点每张卡片自己的「重做本题」（.qfoot 里最后一个 .mini 就是它），
+       这条路径的复位行为探针反复验过，不依赖任何宿主功能。 */
+    Array.prototype.forEach.call(document.querySelectorAll('.q[id]'),function(card){
+      var btns=card.querySelectorAll('.mini');
+      if(btns.length) btns[btns.length-1].click();
+    });
+    /* 筛选态一起复位：否则"只看错题"开着清空后，一道题都看不见 */
+    onlyWrong=false;
+    var cb=document.getElementById('onlyWrong'); if(cb) cb.checked=false;
+    store.ui.onlyWrong=false; save();
+    paintProgress(); applyFilter();
+    try{ if(window.scrollTo) window.scrollTo(0,0); }catch(e){}
+  });
+
+    /* ================= 章专用演示：把本章的演示 IIFE 放在这里 =================
+     每个演示都用 try{ ... }catch(e){console.error(...)} 包住，坏了不连累别的；
+     演示的 DOM 直接写在正文对应知识点旁边（建议 <div class="demo" id="demoA">…</div>），
+     JS 只按 id 取元素、按公式现算现画。示例见 assets/demos-example.js。 */
+/* ---------------- 收尾 ---------------- */
+  /* 调试接口：探针与"我上传的台词到底认没认出来"这种自查都靠它。
+     lines 给的是**副本**（改它不会影响页面台词）；say() 是唯一有副作用的动作，其余都是读状态的 getter。 */
+  try{
+    window.__PET__={
+      lines:JSON.parse(JSON.stringify(LINES)),
+      art:function(){ return kind; },
+      hasImg:function(){ return hasImg; },
+      imageLine:function(){ return imgUrl; },
+      position:function(){ return pos?{r:Math.round(pos.r),b:Math.round(pos.b)}:null; },
+      goal:function(){ return goal?{r:Math.round(goal.r),b:Math.round(goal.b)}:null; },
+      mode:function(){ return mode; },
+      roam:function(){ return {idleMs:ROAM.idle,tickMs:ROAM.tick,speed:ROAM.speed,reach:ROAM.reach,
+                               followSpeed:FOLLOW.speed,followDefault:FOLLOW_DEF,followMax:FMAX,defaults:ROAM_DEF}; },
+      speed:function(){ return Math.round(speed); },          /* 当前这一步用的速度（px/秒），调参数时看它 */
+      pose:function(){ return {moving:!!(fig&&fig.classList.contains('moving')),faceL:!!(fig&&fig.classList.contains('faceL'))}; },
+      lastAct:function(){ return Math.round(NOW()-lastAct); },
+      say:function(t){ say(t); }
+    };
+  }catch(e){}
+
+  /* 吸顶条的高度是活的（触屏/窄窗折行后能到 134px），锚点让位要跟着它走 */
+  function measureBar(){
+    try{
+      var b=document.querySelector('.bar');
+      var h=b?Math.round(b.getBoundingClientRect().height):0;
+      if(h>0) document.documentElement.style.setProperty('--barh',h+'px');
+      BARH=h;
+    }catch(e){}
+  }
+  measureBar();
+  window.addEventListener('resize',measureBar);
+
+  /* 陪练收尾整段隔离：它再出什么问题，也不许连累进度条与结算区
+     （真出过：fig 为 null 时抛 TypeError，把 paintProgress/applyFilter 一起带走，页面静默显示 0/0） */
+  try{
+    resolveArt();          /* 内置大肥鱼是同步就有的，选它的页面立刻就能看到；图片那边命中后再 resolve 一次 */
+    applySize();
+    applyPos(true);        /* 上次拖到哪就还在哪（形象还没出来也没关系，位置先摆好） */
+    if(kind&&store.ui.pet) welcome();
+  }catch(e){ console.error('陪练收尾出错：',e); }
+  refreshToggle();
+  if(!storageOK) noteNoSave();
+  if(onlyWrong){ var cb0=document.getElementById('onlyWrong'); if(cb0) cb0.checked=true; }
+  paintProgress();
+  applyFilter();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+# 构建产物（build.dist / build2 / build3 / build-package 一并覆盖）
+build/
+build-debug/
+build*/
+
+# 第三方依赖（用 tools/fetch-deps.ps1 取，不进版本库）
+third_party/webview2/
+third_party/pdfium/
+third_party/miniz/
+third_party/nlohmann/
+
+# Phase 0 夹具的运行期产物
+#
+# ⚠️ 这里有一处**刻意不忽略**的东西：`spike/_fixtures/csp-probe.js` 与 `csp-skeleton.html`
+# 是手写的对照夹具，要进版本库 —— CSP 只有做了 A/B 才叫验过，那套夹具就是 A/B 的一半。
+#
+# 而下面这些是每次跑都会重新生成的：
+spike/_fixtures/_probe_*.html     # inject-probe.py 的注入副本
+spike/_fixtures/*.json            # isg-spike 的报告
+#
+# ⚠️ 但下面几份**要留档**（由 tools/phase0-verify.ps1 每次运行覆盖）：
+#    纲领 §3.5/§5 引用的数字必须能溯源到原始件。曾经因为基准输出没落盘，
+#    纲领里的一组数与仓库里那份报告全部对不上，没人能判断谁对。
+!spike/_fixtures/bench-summary.json     # 冷/热启动与收尾的原始测量
+!spike/_fixtures/report-last.json       # 主判据（真页 + 探针）那一次的完整报告
+!spike/_fixtures/report-csp-on.json     # CSP 对照的 A 臂
+!spike/_fixtures/report-csp-off.json    # CSP 对照的 B 臂（判据 4 的归因全靠这一对）
+spike/_fixtures/*.json.exitms     # 退出标记
+spike/_fixtures/*.json.leaks.txt  # Debug 版 CRT 泄漏报告
+spike/_fixtures/*.json.leakcfg.txt
+spike/_fixtures/*.leaks.txt
+spike/_fixtures/*.leakcfg.txt
+
+# 报告（docs/phase0-report.md / docs/phase1-report.md 是每次跑验证脚本生成的，但值得留档，故不忽略）
+docs/*.local.md
+
+# ---- Phase 1 起 ----
+# 界面资产是从 oracle 复制 + 补丁生成的（tools/sync-web.ps1 可重建），但**要进版本库**：
+# 它们是"这一版到底跑了什么"的证据，而重建依赖 oracle 就在旁边 —— 打包/换机器时不成立。
+# logic-bundle.js 同理（生成物，但 tools/golden/bundle-logic.js -Check 会盯着它走没走散）。
+
+# 自测 / 验证的运行期产物
+_selftest-out/
+_verify-out/
+_extract-out/
+_st/
+_selftest-*/
+# 单实例 / 冒烟测试的临时配置目录：里面有 WebView2 profile（Local State、DPAPI 密文）
+_smoke/
+_si-test/
+_si-close/
+_si-*/
+# 调试期留下的散件
+_st$t.*
+slow
+# 跨实现 Key 的夹具目录：里面有（测试用的假）API Key 与 DPAPI 密文，不该进版本库
+_keycompat*/
+_keyround/
+_keywrite*/
+
+# 金标准对拍的产物：expected.html 由 oracle 现算，actual.html 由 C++ 现算
+tools/golden/out/
+
+# IDE
+.vs/
+*.user
+*.suo
+
+# 本机构建/测试日志（可能含绝对路径）
+*.log

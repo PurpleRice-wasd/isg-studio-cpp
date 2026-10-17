@@ -1,0 +1,142 @@
+﻿{
+    "GeneratedAt":  "2026-10-17T16:22:44",
+    "Machine":  {
+                    "OS":  "Microsoft Windows 11 家庭版 中文版",
+                    "CPU":  "Intel(R) Core(TM) i7-14650HX",
+                    "RAMGB":  15.7,
+                    "DPI":  192,
+                    "WebView2":  "155.0.4283.60"
+                },
+    "Runs":  [
+                 {
+                     "Label":  "C++ 2.0.0 冷启动",
+                     "ExitCode":  0,
+                     "WindowMs":  111,
+                     "UiMs":  716,
+                     "UiText":  "工作台",
+                     "PrivateMB":  97.6,
+                     "WorkingSetMB":  376.7,
+                     "Processes":  7,
+                     "CloseMs":  82,
+                     "TreeGoneMs":  342,
+                     "Pid":  56888
+                 },
+                 {
+                     "Label":  "C++ 2.0.0 热启动 #1",
+                     "ExitCode":  0,
+                     "WindowMs":  76,
+                     "UiMs":  694,
+                     "UiText":  "工作台",
+                     "PrivateMB":  96,
+                     "WorkingSetMB":  371.3,
+                     "Processes":  7,
+                     "CloseMs":  72,
+                     "TreeGoneMs":  307,
+                     "Pid":  40524
+                 },
+                 {
+                     "Label":  "Electron 1.4.2 热启动 #1",
+                     "ExitCode":  0,
+                     "WindowMs":  485,
+                     "UiMs":  563,
+                     "UiText":  "工作台",
+                     "PrivateMB":  92.5,
+                     "WorkingSetMB":  336.3,
+                     "Processes":  4,
+                     "CloseMs":  119,
+                     "TreeGoneMs":  121,
+                     "Pid":  43864
+                 },
+                 {
+                     "Label":  "C++ 2.0.0 热启动 #2",
+                     "ExitCode":  0,
+                     "WindowMs":  76,
+                     "UiMs":  654,
+                     "UiText":  "工作台",
+                     "PrivateMB":  98.4,
+                     "WorkingSetMB":  373.7,
+                     "Processes":  7,
+                     "CloseMs":  81,
+                     "TreeGoneMs":  343,
+                     "Pid":  49432
+                 },
+                 {
+                     "Label":  "Electron 1.4.2 热启动 #2",
+                     "ExitCode":  0,
+                     "WindowMs":  536,
+                     "UiMs":  624,
+                     "UiText":  "工作台",
+                     "PrivateMB":  90.9,
+                     "WorkingSetMB":  334,
+                     "Processes":  4,
+                     "CloseMs":  129,
+                     "TreeGoneMs":  132,
+                     "Pid":  53972
+                 },
+                 {
+                     "Label":  "C++ 2.0.0 热启动 #3",
+                     "ExitCode":  0,
+                     "WindowMs":  78,
+                     "UiMs":  626,
+                     "UiText":  "工作台",
+                     "PrivateMB":  95.6,
+                     "WorkingSetMB":  365.5,
+                     "Processes":  7,
+                     "CloseMs":  78,
+                     "TreeGoneMs":  322,
+                     "Pid":  39376
+                 },
+                 {
+                     "Label":  "Electron 1.4.2 热启动 #3",
+                     "ExitCode":  0,
+                     "WindowMs":  474,
+                     "UiMs":  567,
+                     "UiText":  "工作台",
+                     "PrivateMB":  91.3,
+                     "WorkingSetMB":  334.6,
+                     "Processes":  4,
+                     "CloseMs":  117,
+                     "TreeGoneMs":  120,
+                     "Pid":  53432
+                 }
+             ],
+    "Summary":  {
+                    "CppColdUiMs":  716,
+                    "CppWarmUiMs":  654,
+                    "ElectronWarmUiMs":  567,
+                    "CppWarmMemMB":  96,
+                    "ElectronWarmMemMB":  91.3,
+                    "CppWarmProcs":  7,
+                    "ElectronWarmProcs":  4,
+                    "CppCloseMs":  78,
+                    "ElectronCloseMs":  119
+                },
+    "Extract":  [
+                    {
+                        "Label":  "C++ PDFium",
+                        "MedianMs":  205,
+                        "RunsMs":  [
+                                       205,
+                                       206,
+                                       205
+                                   ],
+                        "Pages":  143
+                    },
+                    {
+                        "Label":  "Electron pdfjs",
+                        "MedianMs":  624,
+                        "RunsMs":  [
+                                       642,
+                                       622,
+                                       624
+                                   ],
+                        "Pages":  143
+                    }
+                ],
+    "Sizes":  {
+                  "ElectronPortableBytes":  127045627,
+                  "CppPortableBytes":  3972348,
+                  "ElectronDirBytes":  444119205,
+                  "CppDirBytes":  11318123
+              }
+}

@@ -1,0 +1,74 @@
+<!-- ============================================================================
+     演示台的标准骨架 —— 复制这一整块，改 id 前缀与内容即可。
+     约定：
+       · 一个演示一个 <div class="demo" id="demoA">（B、C… 依次），JS 里按这个 id 取元素；
+       · 内部 id 一律「前缀-名字」，如 dA-1 / dA-range / dA-bar，避免和别的演示或题目撞车；
+       · 结构固定四段：标题 → 一句话说明 → 左图右控件（图上所有坐标由 JS 算） → 读数与点评；
+       · 所有数字都由 JS 现算写进 .readout b，图和读数共用同一套映射函数（px()/py()）；
+       · 图形有关的注意事项（矢量方向、垂直、刻度对齐、防裁切）见 references/demo-guide.md。
+     ============================================================================ -->
+<div class="demo" id="demoA">
+  <p class="demo-h"><span class="pill">演示 1</span>（这里写"拖什么、看什么"）</p>
+  <p class="demo-p">（一句话说清这条演示想让人看懂什么。固定的量用 <span class="fx">那种等宽样式</span> 写出来。）</p>
+
+  <div class="demo-grid two">
+    <div class="demo-fig">
+      <!-- 图：viewBox 要留够余量，别让标签贴边（改完必须截图看一遍） -->
+      <svg viewBox="0 0 520 200" role="img" aria-label="（给读屏软件和未来的自己：这张图画的是什么）">
+        <text class="s b" x="12" y="28">（固定的那一行）</text>
+        <rect x="12" y="36" width="150" height="20" rx="4" fill="var(--surface-2)" stroke="var(--rule-strong)"></rect>
+
+        <text class="s b ta" x="12" y="92">（随滑块变的那一行）</text>
+        <rect id="dA-bar" x="12" y="100" width="6" height="26" rx="4" fill="var(--field)"></rect>
+        <text class="s ta b" id="dA-barval" x="330" y="119"></text>
+        <line class="thin" x1="12" y1="146" x2="500" y2="146"></line>
+      </svg>
+    </div>
+
+    <div>
+      <div class="ctrl">
+        <div class="row"><span>（滑块名）</span><b id="dA-val">—</b></div>
+        <input type="range" id="dA-range" min="0" max="100" value="0" aria-label="（滑块的名字，读屏要用）">
+      </div>
+      <div class="chips">
+        <button type="button" data-v="0">（预设 1）</button>
+        <button type="button" data-v="100">（预设 2）</button>
+      </div>
+      <div class="readout">
+        <div><span>（量 1，带单位）</span><b id="dA-1">—</b></div>
+        <div><span>（量 2，带单位）</span><b id="dA-2">—</b></div>
+        <div><span>（量 3，带单位）</span><b id="dA-3">—</b></div>
+      </div>
+      <p class="say" id="dA-say">（随滑块变化的点评；用 innerHTML 写，可以插 <strong>强调</strong>）</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================================
+     配套的 JS（放在引擎的「章专用演示」位置；每个演示都用 try 包住，坏了不连累别的）
+
+  try{ (function(){
+    var rng=document.getElementById('dA-range'),
+        bar=document.getElementById('dA-bar'),
+        barval=document.getElementById('dA-barval'),
+        val=document.getElementById('dA-val'),
+        say=document.getElementById('dA-say'),
+        o1=document.getElementById('dA-1'), o2=document.getElementById('dA-2'), o3=document.getElementById('dA-3');
+    var FIXED=200;                                   // 固定量
+    function render(x){                              // 唯一的入口：所有图与读数都从这里出去
+      var y = 3*x;                                   // ← 物理公式在这里
+      val.textContent = x;                           // 标签
+      o1.textContent = fmt(y); o2.textContent = fmt(y*2); o3.textContent = fmt(y/2);
+      var frac = Math.min(1, y/600);                 // 映射到图上的长度
+      bar.setAttribute('width', String(6+frac*300));
+      barval.setAttribute('x','330');
+      barval.textContent = '…' + fmt(y);
+      say.innerHTML = (x>50) ? '（大值时的说法）' : '（小值时的说法）';
+    }
+    rng.addEventListener('input',function(){ render(+rng.value); });
+    Array.prototype.forEach.call(document.querySelectorAll('#demoA .chips button'),function(b){
+      b.addEventListener('click',function(){ render(+b.getAttribute('data-v')); rng.value=b.getAttribute('data-v'); });
+    });
+    render(0);                                       // 记得先画一次初始状态
+  })(); }catch(e){ console.error('演示 A 出错：',e); }
+     ============================================================================ -->

@@ -1,0 +1,468 @@
+/* 讲练一体页的样式（深浅色 token、题卡、选项反馈、演示台、吸顶条、陪练、背景层）。 */
+
+  :root{
+    --bg:#F3F6F4;
+    --surface:#FFFFFF;
+    --surface-2:#EAEFEC;
+    --ink:#131A17;
+    --ink-2:#48544E;
+    --ink-3:#79857F;
+    --rule:#DBE3DE;
+    --rule-strong:#C2CCC6;
+    --field:#2F8F63;          /* 风绿：主强调 */
+    --field-soft:#E6F4EC;
+    --teal:#2E8E9C;           /* 风元素青 */
+    --teal-soft:#E3F2F4;
+    --gold:#B98A1F;
+    --warn:#A93226;
+    --warn-soft:#FBEAE7;
+    --ok:#2C6B4A;
+    --ok-soft:#E4F1E9;
+    --shadow:0 1px 2px rgba(19,26,23,.05), 0 8px 24px -16px rgba(19,26,23,.25);
+    --font-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    --font-head:"Noto Serif SC","Songti SC",Georgia,serif;
+    --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0E1512; --surface:#16201B; --surface-2:#1F2B25;
+      --ink:#E5EFE9; --ink-2:#A5B3AC; --ink-3:#78857F;
+      --rule:#27332C; --rule-strong:#38463E;
+      --field:#7FD6A5; --field-soft:#13251B;
+      --teal:#6FD3DF; --teal-soft:#0F2427;
+      --gold:#E0B84E;
+      --warn:#E88272; --warn-soft:#2E1A19;
+      --ok:#69C495; --ok-soft:#132A1F;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0E1512; --surface:#16201B; --surface-2:#1F2B25;
+    --ink:#E5EFE9; --ink-2:#A5B3AC; --ink-3:#78857F;
+    --rule:#27332C; --rule-strong:#38463E;
+    --field:#7FD6A5; --field-soft:#13251B;
+    --teal:#6FD3DF; --teal-soft:#0F2427;
+    --gold:#E0B84E;
+    --warn:#E88272; --warn-soft:#2E1A19;
+    --ok:#69C495; --ok-soft:#132A1F;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+    color-scheme:dark;
+  }
+
+  *{box-sizing:border-box}
+  html{
+    /* 安卓 Chrome 的"字号自动放大"会把段落字号撑大、把版面顶乱；iOS 横竖屏切换也会重排 */
+    -webkit-text-size-adjust:100%;text-size-adjust:100%;
+  }
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:var(--font-body);font-size:16px;line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;      /* iOS/安卓点按都不闪那个灰块 */
+  }
+  /* 底部留白要避开 iPhone 的手势条与安卓的导航栏 */
+  .shell{max-width:1080px;margin:0 auto;padding-inline:20px;
+    padding-block:0 calc(120px + env(safe-area-inset-bottom,0px))}
+
+  /* ---------- 背景装饰（淡到不影响阅读） ---------- */
+  .bg-deco{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .bg-deco svg{position:absolute;color:var(--field)}
+  .bg-deco .d1{width:340px;height:340px;left:-70px;top:120px;opacity:.07;transform:rotate(-14deg)}
+  .bg-deco .d2{width:420px;height:420px;right:-120px;top:380px;opacity:.06;transform:rotate(12deg)}
+  .bg-deco .d3{width:300px;height:300px;left:-60px;bottom:60px;opacity:.06;transform:rotate(8deg)}
+  .bg-deco .d4{width:260px;height:260px;right:-40px;bottom:-40px;opacity:.07;transform:rotate(-20deg)}
+  @media (max-width:820px){.bg-deco svg{opacity:.045}}
+  .shell,header.top,.bar{position:relative;z-index:1}
+
+  /* ---------- header ---------- */
+  header.top{border-bottom:1px solid var(--rule);background:linear-gradient(180deg,var(--surface) 0%,var(--bg) 100%)}
+  .top-inner{max-width:1080px;margin:0 auto;padding:38px 20px 26px;display:flex;flex-direction:column;gap:14px}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;color:var(--field);text-transform:uppercase}
+  h1{font-family:var(--font-head);font-size:clamp(26px,4.2vw,40px);line-height:1.2;margin:0;font-weight:700;letter-spacing:-.01em}
+  .sub{color:var(--ink-2);max-width:64ch;margin:0;font-size:15.5px}
+  .facts{display:flex;flex-wrap:wrap;margin-top:4px;border:1px solid var(--rule);border-radius:10px;overflow:hidden;background:var(--surface)}
+  .facts div{flex:1 1 120px;padding:11px 15px;border-right:1px solid var(--rule)}
+  .facts div:last-child{border-right:none}
+  .facts b{display:block;font-family:var(--font-head);font-size:19px;line-height:1.3}
+  .facts span{font-size:12px;color:var(--ink-3);letter-spacing:.04em}
+
+  /* ---------- 顶部粘性进度条 ---------- */
+  .bar{position:sticky;top:0;z-index:30;background:var(--surface);background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--rule)}
+  .bar-inner{max-width:1080px;margin:0 auto;padding:9px 20px;
+    padding-top:calc(9px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:13px}
+  .bar .stats{color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .bar .stats b{color:var(--field)}
+  .prog{flex:1 1 160px;min-width:120px;height:7px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+  .prog i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--field),var(--teal));transition:width .3s ease}
+  .bar label.tg{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--ink-2);white-space:nowrap}
+  .bar input[type=checkbox]{accent-color:var(--field);width:15px;height:15px}
+  .bar button{
+    font:inherit;font-size:12.5px;padding:4px 11px;border-radius:99px;cursor:pointer;
+    border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink-2);
+  }
+  .bar button:hover{border-color:var(--field);color:var(--field)}
+
+  /* ---------- 关卡速跳条 ---------- */
+  .lvnav{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
+  .lvnav a{
+    display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:9px 15px;border-radius:99px;
+    border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink-2);
+    text-decoration:none;font-size:13.5px;font-weight:700;white-space:nowrap;line-height:1.2;
+  }
+  .lvnav a:hover{border-color:var(--field);color:var(--field);background:var(--field-soft)}
+  .lvnav a i{font-style:normal;font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--ink-3)}
+  .lvnav a.alldone{border-color:var(--ok);color:var(--ok)}
+  .lvnav a.alldone i{color:var(--ok)}
+  .jumpnote{font-size:13px;color:var(--ink-3);margin:0 0 9px}
+
+  main{padding-top:34px;min-width:0}
+  /* 锚点让位：条高是变的（触屏/窄窗折行后到 134px），由引擎实测写进 --barh */
+  section{margin:0 0 52px;scroll-margin-top:calc(var(--barh,58px) + 8px)}
+  h2{font-family:var(--font-head);font-size:clamp(20px,2.5vw,26px);line-height:1.3;margin:0 0 6px;font-weight:700}
+  h2 .num{display:inline-block;font-family:var(--font-mono);font-size:.6em;color:var(--field);background:var(--field-soft);padding:2px 8px;border-radius:5px;margin-right:10px;vertical-align:2px;font-weight:600}
+  h3{font-size:17px;font-weight:700;margin:28px 0 8px;padding-left:11px;border-left:3px solid var(--field);line-height:1.5}
+  h4{font-size:15px;font-weight:700;margin:20px 0 6px}
+  p{margin:0 0 13px}
+  .lede{color:var(--ink-2);font-size:15.5px;margin-bottom:20px}
+  a{color:var(--field)}
+  code{font-family:var(--font-mono);font-size:.88em;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+  ul,ol{margin:0 0 13px;padding-left:22px}
+  li{margin-bottom:5px}
+  .fx{font-family:var(--font-mono);font-size:.95em;white-space:nowrap}
+  sub,sup{font-size:.72em}
+
+  .card{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:16px 19px;margin:16px 0;box-shadow:var(--shadow)}
+  .card > :last-child{margin-bottom:0}
+  .note,.warn,.tip{border-radius:8px;padding:13px 17px;margin:15px 0;font-size:15px}
+  .note{background:var(--surface-2);border:1px solid var(--rule)}
+  .warn{background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 32%,transparent)}
+  .tip{background:var(--field-soft);border:1px solid color-mix(in srgb,var(--field) 28%,transparent)}
+  .note > :last-child,.warn > :last-child,.tip > :last-child{margin-bottom:0}
+  .note .h,.warn .h,.tip .h{font-size:12px;font-weight:700;letter-spacing:.1em;display:block;margin-bottom:5px}
+  .note .h{color:var(--ink-2)} .warn .h{color:var(--warn)} .tip .h{color:var(--field)}
+  .warn{color:var(--ink)}
+
+  .tablewrap{overflow-x:auto;margin:16px 0;border:1px solid var(--rule);border-radius:10px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;font-size:14.5px}
+  th,td{padding:9px 13px;text-align:left;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-size:12px;letter-spacing:.06em;color:var(--ink-2);font-weight:700;background:var(--surface-2);white-space:nowrap}
+  tbody tr:last-child td{border-bottom:none}
+  td.c{white-space:nowrap}
+
+  /* ---------- 演示台 ---------- */
+  .demo{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:16px 18px 18px;margin:20px 0;box-shadow:var(--shadow)}
+  .demo-h{font-size:15.5px;font-weight:700;margin:0 0 4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .demo-h .pill{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--field);background:var(--field-soft);border-radius:99px;padding:2px 9px}
+  .demo-p{color:var(--ink-2);font-size:14px;margin:0 0 12px}
+  .demo-grid{display:grid;gap:16px}
+  @media (min-width:800px){.demo-grid.two{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:start}}
+  .demo-fig{overflow-x:auto}
+  .demo-fig svg{display:block;max-width:100%;height:auto}
+  .ctrl{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+  .ctrl .row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px}
+  .ctrl .row b{font-family:var(--font-mono);color:var(--field);font-size:15px}
+  input[type=range]{width:100%;accent-color:var(--field);height:22px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .bar button,.chips button,.btn,.qfoot .mini,.opt{touch-action:manipulation}   /* 点按即响应，不触发双击缩放 */
+  .chips button{
+    font:inherit;font-size:12.5px;padding:4px 10px;border-radius:99px;cursor:pointer;
+    border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink-2);
+  }
+  .chips button:hover{border-color:var(--field);color:var(--field);background:var(--field-soft)}
+  .readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(124px,1fr));gap:8px;margin-top:12px}
+  .readout div{background:var(--surface-2);border-radius:8px;padding:8px 11px}
+  .readout span{display:block;font-size:11px;color:var(--ink-3);letter-spacing:.04em}
+  .readout b{font-family:var(--font-mono);font-size:14.5px;font-weight:700}
+  .say{font-size:13.5px;color:var(--ink-2);margin-top:11px;padding-left:11px;border-left:2px solid var(--field)}
+  svg text{fill:currentColor;font-family:var(--font-body);font-size:12px}
+  svg text.s{font-size:11px} svg text.xs{font-size:10px} svg text.b{font-weight:700}
+  svg text.mid{text-anchor:middle} svg text.end{text-anchor:end}
+  svg text.ta{fill:var(--field);font-weight:700} svg text.tt{fill:var(--teal);font-weight:700}
+  svg text.tw{fill:var(--warn);font-weight:700}
+  svg .ln{stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round}
+  svg .thin{stroke:currentColor;fill:none;stroke-width:1;opacity:.5}
+  svg .acc{stroke:var(--field);fill:none;stroke-width:2.4;stroke-linecap:round}
+  svg .acl{stroke:var(--teal);fill:none;stroke-width:2.2;stroke-linecap:round}
+  svg .wrn{stroke:var(--warn);fill:none;stroke-width:2;stroke-linecap:round}
+  svg .dash{stroke-dasharray:5 4}
+  svg .dot{fill:currentColor} svg .accdot{fill:var(--field)} svg .teldot{fill:var(--teal)} svg .wrndot{fill:var(--warn)}
+  svg .mh{fill:currentColor} svg .mha{fill:var(--field)}
+
+  /* ---------- 题目卡片 ---------- */
+  .lvhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:2px}
+  .lvhead .cnt{font-size:12.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+  .qlist{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+  .q{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:15px 18px 16px;box-shadow:var(--shadow)}
+  .q.done{border-color:color-mix(in srgb,var(--rule) 70%,transparent)}
+  /* 题库配置有误的题：标出来、但不参与作答（别让学生对着死按钮发呆） */
+  .q.broken{background:var(--warn-soft);border:1px dashed var(--warn)}
+  .q.broken .qstem{color:var(--warn);margin-bottom:6px}
+  .q.broken .lede{margin:0;font-size:13px}
+  .q.right{border-left:3px solid var(--ok)}
+  .q.wrongq{border-left:3px solid var(--warn)}
+  .qhead{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:7px;font-size:11.5px}
+  .qno{font-family:var(--font-mono);font-weight:700;color:var(--field);background:var(--field-soft);border-radius:99px;padding:2px 9px;letter-spacing:.04em}
+  .qtype{color:var(--ink-3);letter-spacing:.08em}
+  .qmark{margin-left:auto;font-weight:700;font-size:12.5px}
+  .qmark.ok{color:var(--ok)} .qmark.no{color:var(--warn)}
+  .qstem{font-size:15.5px;margin:0 0 12px;line-height:1.72}
+  .qstem .lbl{font-weight:700;color:var(--field);margin-right:4px}
+
+  .opts{display:flex;flex-direction:column;gap:7px}
+  .opt{
+    display:flex;gap:11px;align-items:flex-start;text-align:left;width:100%;
+    font:inherit;font-size:15px;line-height:1.62;color:var(--ink);
+    background:var(--surface);border:1px solid var(--rule);border-radius:9px;
+    padding:9px 13px;cursor:pointer;transition:border-color .13s,background .13s;
+  }
+  .opt:hover:not(:disabled){border-color:var(--field);background:var(--field-soft)}
+  .opt:disabled{cursor:default}
+  .opt .badge{
+    flex:0 0 auto;width:22px;height:22px;border-radius:50%;margin-top:2px;
+    display:grid;place-items:center;font-family:var(--font-mono);font-size:12px;font-weight:700;
+    background:var(--surface-2);color:var(--ink-2);
+  }
+  .opt.picked{border-color:var(--field);background:var(--field-soft)}
+  .opt.picked .badge{background:var(--field);color:#fff}
+  :root[data-theme="dark"] .opt.picked .badge{color:#0E1512}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .opt.picked .badge{color:#0E1512}}
+  .opt.ok{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.ok .badge{background:var(--ok);color:#fff}
+  :root[data-theme="dark"] .opt.ok .badge{color:#0E1512}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .opt.ok .badge{color:#0E1512}}
+  .opt.bad{border-color:var(--warn);background:var(--warn-soft)}
+  .opt.bad .badge{background:var(--warn);color:#fff}
+  .opt .why{display:none}
+  .opt .why.on{display:block;margin-top:5px;font-size:13.5px;color:var(--ink-2);line-height:1.6}
+  .opt.ok .why.on{color:var(--ok)}
+  .opt.bad .why.on{color:var(--warn)}
+
+  .numrow{display:flex;flex-wrap:wrap;align-items:center;gap:9px}
+  .numrow input[type=text]{
+    font:inherit;font-family:var(--font-mono);font-size:16px;width:180px;
+    padding:8px 12px;border-radius:9px;border:1px solid var(--rule-strong);
+    background:var(--surface);color:var(--ink);
+  }
+  .numrow input[type=text]:focus{outline:2px solid var(--field);outline-offset:1px;border-color:var(--field)}
+  .numrow .unit{font-family:var(--font-mono);font-size:14px;color:var(--ink-2)}
+  .btn{
+    font:inherit;font-size:13.5px;padding:6px 14px;border-radius:99px;cursor:pointer;
+    border:1px solid var(--field);background:var(--field);color:#fff;font-weight:500;
+  }
+  /* 注意 :not(.ghost)：:root[data-theme=dark] .btn 的权重是 (0,3,0)，会压过后面的 .btn.ghost (0,2,0)，
+     暗色下 ghost 按钮的文字色被换成深色 → 对比度 1.11，肉眼几乎看不见（踩过） */
+  :root[data-theme="dark"] .btn:not(.ghost){color:#0E1512}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn:not(.ghost){color:#0E1512}}
+  .btn.ghost{background:var(--surface);color:var(--ink-2);border-color:var(--rule-strong)}
+  .btn.ghost:hover{border-color:var(--field);color:var(--field)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+
+  .fb{margin-top:11px;border-radius:9px;padding:10px 13px;font-size:14.5px;display:none}
+  .fb.on{display:block}
+  .fb.ok{background:var(--ok-soft);border:1px solid color-mix(in srgb,var(--ok) 34%,transparent);color:var(--ok);font-weight:700}
+  .fb.no{background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 34%,transparent);color:var(--warn);font-weight:700}
+  .fb .sub{display:block;font-weight:400;color:var(--ink-2);margin-top:4px;font-size:14px}
+
+  .qfoot{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:11px}
+  .qfoot .link{font-size:13px;color:var(--field);text-decoration:none;border-bottom:1px dashed color-mix(in srgb,var(--field) 45%,transparent)}
+  .qfoot .link:hover{border-bottom-style:solid}
+  .qfoot .mini{font:inherit;font-size:12.5px;padding:3px 10px;border-radius:99px;cursor:pointer;border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink-2)}
+  .qfoot .mini:hover{border-color:var(--field);color:var(--field)}
+  .box{margin-top:10px;border-radius:9px;padding:11px 14px;font-size:14.5px;line-height:1.7;display:none}
+  .box.on{display:block}
+  .box.hint{background:var(--teal-soft);border:1px solid color-mix(in srgb,var(--teal) 30%,transparent)}
+  .box.sol{background:var(--surface-2);border:1px solid var(--rule)}
+  .box .h{font-size:11.5px;font-weight:700;letter-spacing:.1em;display:block;margin-bottom:5px}
+  .box.hint .h{color:var(--teal)} .box.sol .h{color:var(--ink-2)}
+  .box > :last-child{margin-bottom:0}
+
+  .grp{border:1px solid var(--rule);border-radius:12px;background:var(--surface);box-shadow:var(--shadow);padding:15px 18px 4px}
+  .grp > .q{box-shadow:none;border:none;border-top:1px dashed var(--rule);border-radius:0;padding:14px 0 12px;margin:0;background:none}
+  .grp > .q:first-of-type{border-top:none}
+
+  .hidden{display:none!important}
+
+  /* ---------- 陪练（只有同目录里真找到图片才出现；没图就完全不占地方） ---------- */
+  .pet{position:fixed;right:14px;bottom:14px;z-index:45;pointer-events:none}
+  .pet.off{display:none}
+  /* 气泡**必须绝对定位**：让它参与文档流的话，气泡文字一长一短就会把形象挤得左右乱跳 */
+  .pet .bubble{
+    position:absolute;right:calc(100% + 9px);bottom:0;
+    /* width:max-content 是必须的：.pet 是 position:fixed、宽度收缩到形象那么宽，
+       绝对定位的气泡在这里算出的可用宽度是负的，会一路掉到 min-content（每行两三个字）。
+       max-height + overflow 是兜底：用户自己写的长台词不许顶出视口还看不见。 */
+    width:230px;                                    /* 老浏览器兜底：不支持 max-content 时也给个确定宽度，别塌成细条 */
+    width:max-content;max-width:230px;
+    max-height:300px;max-height:min(52vh,300px);overflow:auto;
+    pointer-events:auto;background:var(--surface);border:1px solid var(--rule);
+    border-radius:12px 12px 4px 12px;padding:9px 13px;font-size:13.5px;line-height:1.6;color:var(--ink);
+    box-shadow:var(--shadow);opacity:0;transform:translateY(6px);transition:opacity .22s,transform .22s;
+  }
+  .pet .bubble.on{opacity:1;transform:translateY(0)}
+  .pet.flip .bubble{right:auto;left:calc(100% + 9px);border-radius:12px 12px 12px 4px}  /* 贴左边缘时气泡翻到右边 */
+  .pet .fig{display:none}                      /* 默认什么都不显示：等引擎确认形象可用了再说 */
+  .pet .fig.hasimg{
+    display:block;width:calc(76px * var(--petk,1) * var(--petbase,1));height:calc(88px * var(--petk,1) * var(--petbase,1));
+    pointer-events:auto;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;
+    -webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+    border-radius:50%;overflow:hidden;border:2px solid var(--field);background:var(--surface);
+    box-shadow:var(--shadow);animation:bob 4.2s ease-in-out infinite;
+  }
+  .pet .fig.hasimg:active{cursor:grabbing}
+  .pet .fig img{width:100%;height:100%;object-fit:cover;object-position:50% 16%;display:block;-webkit-user-drag:none}
+  /* 内置「大肥鱼」是带透明通道的整身立绘：不套圆形头像框，直接立着；
+     移动/拖动时换成侧面那张，朝右时镜像（侧面原图是朝左的）。 */
+  .pet .fig.kind-fish{
+    width:calc(72px * var(--petk,1) * var(--petbase,1));height:calc(96px * var(--petk,1) * var(--petbase,1));
+    border:none;border-radius:0;background:none;box-shadow:none;overflow:visible;
+    filter:drop-shadow(0 5px 9px rgba(19,26,23,.28));
+  }
+  .pet .fig.kind-fish img{object-fit:contain;object-position:50% 100%}
+  .pet .fig.kind-fish img.fish-side{display:none}
+  .pet .fig.kind-fish.moving img.fish-front{display:none}
+  .pet .fig.kind-fish.moving img.fish-side{display:block}
+  .pet .fig.kind-fish.faceL img{-webkit-transform:scaleX(-1);transform:scaleX(-1)}
+  .pet.dragging .fig{animation:none}           /* 拖动时停掉浮动，否则 getBoundingClientRect 一直在抖 */
+  /* 气泡里的按钮（「换成大肥鱼」「怎么放图」那种） */
+  .pet .bubble button{
+    margin:6px 6px 0 0;padding:5px 10px;font:inherit;font-size:12.5px;cursor:pointer;
+    color:var(--field);background:var(--field-soft);border:1px solid var(--field);border-radius:99px;
+  }
+  .pet .bubble button:hover{background:var(--field);color:var(--surface)}
+  /* 右键（手机上长按）菜单 */
+  .pet .petmenu{
+    display:none;position:absolute;right:0;bottom:calc(100% + 10px);pointer-events:auto;padding:8px;
+    max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px);   /* dvh 兜住 iPad Safari 的"高 100vh" */
+    overflow:auto;overscroll-behavior:contain;
+    background:var(--surface);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow);min-width:196px;
+  }
+  .pet.menuon .petmenu{display:block}
+  /* 用 --ink-2 而不是 --ink-3：11px 的小标题用 ink-3 时对比度只有 3.84(浅)/4.35(暗)，压线 */
+  .petmenu .mt{font-size:11.5px;font-weight:700;letter-spacing:.08em;color:var(--ink-2);margin:4px 4px 4px}
+  .petmenu .mt:first-child{margin-top:0}
+  .petmenu button{
+    display:block;width:100%;margin:0 0 2px;padding:6px 9px;text-align:left;cursor:pointer;
+    font:inherit;font-size:13px;color:var(--ink);background:transparent;border:1px solid transparent;border-radius:8px;
+  }
+  .petmenu button:hover{border-color:var(--field);color:var(--field);background:var(--field-soft)}
+  .petmenu button.on{border-color:var(--field);color:var(--field);background:var(--field-soft);font-weight:700}
+  /* 溜达设置面板（右键菜单 →「溜达设置…」） */
+  .pet .petpanel{
+    display:none;position:absolute;right:0;bottom:calc(100% + 10px);width:286px;max-width:calc(100vw - 28px);
+    pointer-events:auto;                       /* 必须写：pointer-events 会继承，父级 .pet 是 none（漏了这句整块面板点不动） */
+    max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px);   /* dvh 兜住 iPad Safari 的"高 100vh" */
+    overflow:auto;overscroll-behavior:contain;padding:10px 13px 12px;
+    background:var(--surface);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow);
+  }
+  .pet.panelon .petpanel{display:block}
+  .petpanel .pp-h{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:4px}
+  .petpanel .pp-x{border:1px solid transparent;background:transparent;color:var(--ink-3);font-size:16px;line-height:1;
+    padding:1px 7px;border-radius:7px;cursor:pointer}
+  .petpanel .pp-x:hover{border-color:var(--field);color:var(--field);background:var(--field-soft)}
+  .petpanel .pp-row{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--ink-2);margin:8px 0 1px}
+  .petpanel .pp-row b{font-family:var(--font-mono);color:var(--field);font-size:12.5px}
+  .petpanel input[type=range]{width:100%;height:20px;margin:0}
+  .petpanel .chips{margin-top:10px}
+  .petpanel .pp-note{font-size:11.5px;line-height:1.5;color:var(--ink-3);margin:9px 0 0}
+  /* 模式/大小各排一行：菜单矮一半，手机上和"形象靠近视口中部"时就不用滚 */
+  .petmenu .mrow{display:flex;gap:4px;margin:0 0 3px}
+  .petmenu .mrow button{width:auto;flex:1 1 0;text-align:center;white-space:nowrap;margin:0;padding:6px 4px;font-size:12.5px}
+
+  /* ---------- 背景图（同目录放了图片时自动启用；见引擎里的 IMG_CAND） ---------- */
+  .bgimg{
+    position:fixed;top:0;right:0;bottom:0;left:0;z-index:0;pointer-events:none;opacity:0;
+    background-position:50% 28%;background-size:cover;background-repeat:no-repeat;
+    filter:blur(3px) saturate(.95);-webkit-filter:blur(3px) saturate(.95);
+    transform:scale(1.04);-webkit-transform:scale(1.04);
+  }
+  .bgimg.on{opacity:.15}
+  @media (max-width:640px){                      /* 手机的 GPU 弱，模糊半径降下来，画面几乎一样但省电 */
+    .bgimg{filter:blur(2px) saturate(.95);-webkit-filter:blur(2px) saturate(.95);transform:scale(1.03);-webkit-transform:scale(1.03)}
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bgimg.on{opacity:.10}}
+  :root[data-theme="dark"] .bgimg.on{opacity:.10}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  /* 走动时的"走路"动作：小幅度上下 + 左右轻轻摆，跟站着的慢浮动区分开（不动的 bob 是 4.2s 的呼吸感） */
+  @keyframes walk{
+    0%,100%{transform:translateY(0) rotate(0deg)}
+    25%{transform:translateY(-3px) rotate(-2.5deg)}
+    75%{transform:translateY(-3px) rotate(2.5deg)}
+  }
+  /* 权重必须压过 .pet.happy .fig.hasimg（4 个类）——不然"跳一下"那个类粘着的时候，走路动作永远不出现（踩过） */
+  .pet .fig.hasimg.kind-image.moving,
+  .pet .fig.hasimg.kind-fish.moving{animation:walk .46s ease-in-out infinite;animation-duration:var(--walkdur,.46s);
+    transform-origin:50% 90%}
+  .pet.dragging .fig.hasimg.kind-image,
+  .pet.dragging .fig.hasimg.kind-fish{animation:none}   /* 手动拖的时候不摆手，跟随手指更稳 */
+  .pet.happy .fig.hasimg{animation:hop .5s ease-out 2}
+  @keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-12px)}}
+  /* 注意权重：上面 .pet .fig.hasimg 和 .pet.happy .fig.hasimg 都带 animation，
+     所以这条必须写到同样的权重上，否则是死代码（踩过）。 */
+  @media (prefers-reduced-motion:reduce){
+    .pet .fig,.pet .fig.hasimg,.pet .fig.kind-fish,.pet.happy .fig.hasimg,
+    .pet .fig.hasimg.kind-image.moving,.pet .fig.hasimg.kind-fish.moving{animation:none}
+  }
+  @media (max-width:640px){
+    /* 手机上形象整体缩小（菜单里的"大小"仍在此基础上缩放）；右下角让开手势条 */
+    .pet{right:calc(8px + env(safe-area-inset-right,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));--petbase:.76}
+    .pet .bubble{max-width:220px;max-width:min(74vw,220px);font-size:12.5px;max-height:240px;max-height:min(46vh,240px)}
+    .pet .petmenu{bottom:calc(100% + 8px);padding:6px;min-width:126px}
+    .pet .petpanel{width:min(86vw,272px);padding:9px 11px 11px}
+    .petmenu button{padding:5px 8px;font-size:12.5px}
+    .petmenu .mt{margin:2px 3px 3px}
+  }
+
+  /* ---------- 结算 ---------- */
+  .scoregrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .scoregrid div{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px 15px}
+  .scoregrid span{display:block;font-size:11.5px;color:var(--ink-3);letter-spacing:.06em}
+  .scoregrid b{font-family:var(--font-head);font-size:24px;font-weight:700;line-height:1.35}
+  .lvbar{display:flex;flex-direction:column;gap:7px;margin:14px 0}
+  .lvbar .r{display:flex;align-items:center;gap:10px;font-size:13.5px}
+  .lvbar .r .nm{flex:0 0 auto;min-width:126px;color:var(--ink-2)}
+  .lvbar .r .tr{flex:1 1 auto;height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+  .lvbar .r .tr i{display:block;height:100%;width:0;background:var(--field);border-radius:99px;transition:width .3s}
+  .lvbar .r .vl{flex:0 0 auto;font-family:var(--font-mono);font-size:12.5px;color:var(--ink-3);min-width:58px;text-align:right}
+
+  footer{border-top:1px solid var(--rule);margin-top:56px;padding-top:18px;font-size:13.5px;color:var(--ink-3);max-width:76ch}
+  :focus-visible{outline:2px solid var(--field);outline-offset:2px;border-radius:4px}
+
+  /* ---------- 触摸设备（手机 + 平板）----------
+     平板竖屏 744~1024px 走的是桌面布局（640 那个断点管不到），但手指比鼠标粗得多，
+     所以"按下去的东西"要单独放大到 ≈40px 高，滑块拇指也要好抓。pointer:coarse = 主输入是触摸。 */
+  @media (pointer:coarse){
+    .bar button{padding:8px 14px;font-size:13.5px}
+    .chips button{padding:8px 13px;font-size:13px}
+    .qfoot .mini{padding:9px 13px;font-size:13px;min-height:40px}
+    .qfoot{gap:11px}
+    /* ⚠️ 下面两条是补漏的：这三个可点元素以前**没被这条媒体查询覆盖**，
+       实测粗指针下分别是 22.8 / 23.8 / 38.8px —— 都在本块自己写的"≈40px"门槛之下，
+       而它们是手机上最常按的（「只看错题」那个开关、错题卡下方的两个动作）。
+       `.tg` 是个没有内边距的 inline-flex label，所以光靠字号撑不起来。 */
+    .bar label.tg{padding:9px 6px;min-height:40px}
+    /* `.qfoot .link` 原来靠 `border-bottom` 画虚线；直接加内边距会把那条线**推离文字**，
+       看着像给别的元素画的下划线。改用 `text-decoration`，线跟着文字走。 */
+    .qfoot .link{padding:9px 4px;min-height:40px;display:inline-flex;align-items:center;
+      border-bottom:none;text-decoration:underline dashed;text-underline-offset:3px}
+    input[type=range]{height:28px}
+    .btn{padding:11px 20px;font-size:15px}
+    .petmenu button{padding:11px 11px;font-size:13.5px;line-height:1.35}
+    .petmenu .mrow button{padding:11px 4px;font-size:13px}
+    .petmenu .mt{margin:6px 4px 5px}
+    .petmenu .mrow{gap:6px}
+    .pet .petmenu{min-width:210px}
+    .petpanel .pp-x{padding:8px 12px;font-size:19px;min-width:40px;min-height:40px}
+    .petpanel .pp-row{margin:11px 0 3px;font-size:13px}
+    .petpanel input[type=range]{height:30px}
+  }
+  /* 触屏上不要"粘住"hover 样式（iOS 点一下会留着 hover 态） */
+  @media (hover:none){
+    .opt:hover:not(:disabled),.chips button:hover,.bar button:hover,.petmenu button:hover,
+    .lvnav a:hover,.btn.ghost:hover,.qfoot .link:hover,.qfoot .mini:hover,
+    .pet .bubble button:hover,.petpanel .pp-x:hover{border-color:var(--rule-strong);background:inherit;color:inherit}
+  }
+  /* ⚠️ 上面这两条"触摸设备"的媒体查询必须留在样式表**最末**：
+     它们要覆盖 .petmenu button / .petpanel input 这些在中段定义过的东西，
+     同权重时靠"后出现者胜"，放前面就会被盖掉（踩过：触摸下菜单项只剩 31px）。 */

@@ -1,0 +1,2 @@
+ecd8ba90ce498f1022f09e5bfe7e3ceea49b7fa7e1a279ff4b9ac284333ac0f3  ISG-Studio-Setup-2.0.0-x64.exe
+35fef2e04a0729c13afe86e6a7deda4d31c1e06b6f8805ef7fb03afb3f8f61e1  ISG-Studio-Portable-2.0.0-x64.exe

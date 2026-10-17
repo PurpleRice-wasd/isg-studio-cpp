@@ -1,0 +1,870 @@
+<title>讲练一体 C++ 验收报告</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@600;700&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --paper: #f5f7f4;
+    --surface: #ffffff;
+    --ink: #17201e;
+    --muted: #5c6865;
+    --line: #d7ded9;
+    --accent: #0f766e;
+    --accent-ink: #0b5d56;
+    --accent-soft: #e2f0ed;
+    --ok: #15803d;
+    --ok-soft: #e6f4ea;
+    --warn: #9a5b06;
+    --warn-soft: #fbf0da;
+    --danger: #b42318;
+    --danger-soft: #fbe9e7;
+    --code-bg: #edf2ee;
+    --shadow: 0 1px 0 rgba(23, 32, 30, .04), 0 12px 28px -22px rgba(23, 32, 30, .45);
+    --serif: "Noto Serif SC", "Songti SC", "STSong", serif;
+    --sans: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace;
+    --maxw: 1080px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --paper: #0d1413;
+      --surface: #131c1a;
+      --ink: #e8efec;
+      --muted: #9ba9a4;
+      --line: #293733;
+      --accent: #5eead4;
+      --accent-ink: #99f6e4;
+      --accent-soft: #15322e;
+      --ok: #4ade80;
+      --ok-soft: #14301f;
+      --warn: #fbbf24;
+      --warn-soft: #33270e;
+      --danger: #f87171;
+      --danger-soft: #331715;
+      --code-bg: #101a18;
+      --shadow: 0 1px 0 rgba(255,255,255,.03), 0 18px 38px -26px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper: #0d1413;
+    --surface: #131c1a;
+    --ink: #e8efec;
+    --muted: #9ba9a4;
+    --line: #293733;
+    --accent: #5eead4;
+    --accent-ink: #99f6e4;
+    --accent-soft: #15322e;
+    --ok: #4ade80;
+    --ok-soft: #14301f;
+    --warn: #fbbf24;
+    --warn-soft: #33270e;
+    --danger: #f87171;
+    --danger-soft: #331715;
+    --code-bg: #101a18;
+    --shadow: 0 1px 0 rgba(255,255,255,.03), 0 18px 38px -26px rgba(0,0,0,.9);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+    padding-left: max(18px, env(safe-area-inset-left, 0px));
+    padding-right: max(18px, env(safe-area-inset-right, 0px));
+    padding-bottom: 56px;
+  }
+  a { color: var(--accent-ink); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:hover { color: var(--accent); }
+  code, .mono { font-family: var(--mono); font-size: .88em; }
+  code { background: var(--code-bg); padding: .12em .38em; border-radius: 4px; }
+  .wrap { max-width: var(--maxw); margin: 0 auto; }
+
+  /* ---------- masthead ---------- */
+  header.masthead {
+    padding-block: 46px 28px;
+    border-bottom: 1px solid var(--line);
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 28px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(32px, 5vw, 54px);
+    line-height: 1.18;
+    letter-spacing: -.015em;
+    margin: 16px 0 10px;
+    text-wrap: balance;
+  }
+  .subtitle { color: var(--muted); font-size: 16.5px; max-width: 62ch; margin: 0; }
+  .verdict {
+    margin-top: 26px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--ok);
+    border-radius: 0 10px 10px 0;
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .verdict .stamp {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .08em;
+    color: var(--ok);
+    background: var(--ok-soft);
+    border: 1px solid color-mix(in srgb, var(--ok) 30%, transparent);
+    border-radius: 999px;
+    padding: 4px 11px;
+    white-space: nowrap;
+  }
+  .verdict strong { font-size: 17px; font-weight: 600; }
+  .verdict .aside { color: var(--muted); font-size: 13.5px; margin-left: auto; }
+
+  .meta {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .meta div { background: var(--surface); padding: 13px 15px; min-width: 0; }
+  .meta dt {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 4px;
+  }
+  .meta dd { margin: 0; font-size: 13.5px; overflow-wrap: anywhere; }
+
+  /* ---------- nav ---------- */
+  nav.toc {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    padding-block: 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  nav.toc a {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    text-decoration: none;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 5px 11px;
+    background: var(--surface);
+  }
+  nav.toc a:hover { color: var(--accent-ink); border-color: var(--accent); }
+
+  main { padding-top: 40px; }
+  section { scroll-margin-top: 20px; }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin: 0 0 18px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 10px;
+  }
+  .section-head .num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent-ink);
+    letter-spacing: .08em;
+  }
+  h2 {
+    font-family: var(--serif);
+    font-size: clamp(23px, 3vw, 30px);
+    line-height: 1.3;
+    margin: 0;
+    letter-spacing: -.01em;
+  }
+  h3 {
+    font-family: var(--serif);
+    font-size: 19px;
+    margin: 30px 0 10px;
+    line-height: 1.4;
+  }
+  p { margin: 0 0 13px; }
+  .lead { font-size: 16.5px; color: var(--muted); max-width: 70ch; }
+  .note { color: var(--muted); font-size: 13.5px; }
+
+  /* ---------- stats ---------- */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 22px 0 8px;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 16px 14px;
+    min-width: 0;
+  }
+  .stat .k {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .stat .v {
+    font-family: var(--mono);
+    font-size: clamp(24px, 3.4vw, 34px);
+    font-weight: 600;
+    line-height: 1.15;
+    margin: 5px 0 2px;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+  .stat .d { color: var(--muted); font-size: 12.5px; }
+
+  /* ---------- phase timeline ---------- */
+  .phases { display: grid; gap: 0; margin-top: 8px; }
+  .phase {
+    display: grid;
+    grid-template-columns: 102px minmax(0, 1fr);
+    gap: 22px;
+    padding: 20px 0 22px;
+    border-top: 1px solid var(--line);
+  }
+  .phase:last-child { border-bottom: 1px solid var(--line); }
+  .phase .tag { min-width: 0; }
+  .phase .tag .p {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    color: var(--accent-ink);
+  }
+  .phase .tag .s {
+    display: inline-block;
+    margin-top: 7px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .05em;
+    color: var(--ok);
+    background: var(--ok-soft);
+    border-radius: 999px;
+    padding: 2px 9px;
+  }
+  .phase .tag .s.gap { color: var(--warn); background: var(--warn-soft); }
+  .phase h3 { margin: 0 0 6px; font-size: 19px; }
+  .phase p { margin: 0 0 7px; }
+  .phase ul { margin: 6px 0 0; padding-left: 1.15em; }
+  .phase li { margin: 3px 0; }
+  .phase li::marker { color: var(--accent); }
+
+  /* ---------- tables ---------- */
+  .tablewrap { overflow-x: auto; margin: 14px 0 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 13.5px; }
+  th, td { padding: 10px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+  th {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    background: color-mix(in srgb, var(--code-bg) 55%, var(--surface));
+  }
+  tr:last-child td { border-bottom: 0; }
+  td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .suitegrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 30px; }
+  .suitegrid table { min-width: 0; }
+
+  /* ---------- commands ---------- */
+  .cmd {
+    position: relative;
+    background: var(--code-bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin: 12px 0 16px;
+    overflow: hidden;
+  }
+  .cmd pre {
+    margin: 0;
+    padding: 16px 118px 16px 18px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .copy {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .05em;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 5px 9px;
+    cursor: pointer;
+  }
+  .copy:hover { color: var(--accent-ink); border-color: var(--accent); }
+  .copy:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- callouts ---------- */
+  .callout {
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 17px;
+    margin: 14px 0;
+  }
+  .callout.warn { border-left-color: var(--warn); }
+  .callout.danger { border-left-color: var(--danger); }
+  .callout .h {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* ---------- gaps ---------- */
+  .gaps { display: grid; gap: 10px; margin-top: 12px; }
+  .gapitem {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 13px 16px;
+  }
+  .gapitem .sev {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .06em;
+    align-self: start;
+    padding: 3px 8px;
+    border-radius: 999px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .sev.high { color: var(--danger); background: var(--danger-soft); }
+  .sev.mid { color: var(--warn); background: var(--warn-soft); }
+  .sev.low { color: var(--muted); background: var(--code-bg); }
+  .gapitem p { margin: 0; font-size: 13.5px; }
+  .gapitem b { font-weight: 600; }
+
+  /* ---------- checklist ---------- */
+  .checklist { display: grid; gap: 8px; margin-top: 10px; }
+  .checklist label {
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px 14px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .checklist input { margin-top: 4px; accent-color: var(--accent); width: 15px; height: 15px; flex: none; }
+  .checklist input:checked + span { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+
+  /* ---------- footer ---------- */
+  footer {
+    margin-top: 46px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 12.5px;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  footer .mono { font-size: 11px; }
+
+  @media (max-width: 760px) {
+    .meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .phase { grid-template-columns: 1fr; gap: 8px; }
+    .phase .tag { display: flex; gap: 10px; align-items: center; }
+    .phase .tag .s { margin-top: 0; }
+    .suitegrid { grid-template-columns: 1fr; }
+    .gapitem { grid-template-columns: 1fr; gap: 6px; }
+    .gapitem .sev { justify-self: start; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="eyebrow">C++ 重写 · 全流程验收 · Phase 0–6</div>
+    <h1>讲练一体工作台<br>C++ 宿主验收报告</h1>
+    <p class="subtitle">从技术验证到校验闭环、收尾功能与便携打包。本文覆盖全部阶段、可复现命令、证据索引，以及必须由验收人签字的已知缺口。</p>
+    <p class="note">独立仓库说明：本报告在原 monorepo（含 Electron 1.4.2 oracle）中完成；本仓库只含 C++ 源码与运行期 skill/契约，oracle、样本与本地证据不在仓库内。</p>
+
+    <div class="verdict">
+      <span class="stamp">可以验收</span>
+      <strong>103 条外层判据全过，0 跳过</strong>
+      <span class="aside">包含真 PDF 样本与跨实现 Key</span>
+    </div>
+
+    <dl class="meta">
+      <div><dt>报告截止</dt><dd>2026-10-17</dd></div>
+      <div><dt>被测 exe</dt><dd class="mono">SHA256 34a69352…</dd></div>
+      <div><dt>便携目录</dt><dd>10.79 MB</dd></div>
+      <div><dt>便携 zip</dt><dd>5.08 MB</dd></div>
+      <div><dt>安装版 / 便携单文件</dt><dd>3.83 / 3.79 MB</dd></div>
+    </dl>
+  </header>
+
+  <nav class="toc" aria-label="目录">
+    <a href="#verdict">结论</a>
+    <a href="#deliverables">交付物</a>
+    <a href="#phases">全流程</a>
+    <a href="#snapshot">最终验证</a>
+    <a href="#accept">验收步骤</a>
+    <a href="#adversarial">反作弊</a>
+    <a href="#gaps">已知缺口</a>
+    <a href="#design">关键设计</a>
+    <a href="#evidence">证据索引</a>
+    <a href="#signoff">签署清单</a>
+    <a href="#final">最终补验</a>
+  </nav>
+
+  <main>
+    <section id="verdict">
+      <div class="section-head"><span class="num">00</span><h2>结论</h2></div>
+      <p class="lead">Phase 0–6 全部走完。自动判据可复现，交付物可打开；剩余验收重点不是“再跑一遍绿不绿”，而是人工走一遍真实生成，并对已知缺口逐条签字。</p>
+
+      <div class="stats">
+        <div class="stat"><div class="k">外层判据</div><div class="v">103</div><div class="d">全过 · 0 跳过</div></div>
+        <div class="stat"><div class="k">金标准</div><div class="v">157,557</div><div class="d">字节 · 逐字节相同</div></div>
+        <div class="stat"><div class="k">取消生效</div><div class="v">0.26 s</div><div class="d">服务端确认断开</div></div>
+        <div class="stat"><div class="k">交付目录</div><div class="v">10.79</div><div class="d">MB · ≤ 15 MB</div></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="h">不能称为“纲领 §9 全部收口”的部分</div>
+        <p>没有真实手机/平板浏览器验证；内存、安装包体积、冷热启动六项硬指标没有完整复测。这两项必须在验收时单独确认。NSIS 安装版与单文件便携版已在最终补验中产出并实测（见 §10）。</p>
+      </div>
+    </section>
+
+    <section id="deliverables">
+      <div class="section-head"><span class="num">01</span><h2>交付物与验收环境</h2></div>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>东西</th><th>位置</th></tr></thead>
+          <tbody>
+            <tr><td>可执行程序</td><td><code>build3/dist/isg-studio.exe</code> + <code>pdfium.dll</code> + <code>web/</code></td></tr>
+            <tr><td>便携交付目录</td><td><code>build-package/isg-studio-2.0.0/</code>（含 <code>skill/</code>、<code>docs/generation-contract.md</code>）</td></tr>
+            <tr><td>便携 zip</td><td><code>build-package/isg-studio-2.0.0-portable.zip</code></td></tr>
+            <tr><td>安装版 exe</td><td><code>build-package/ISG-Studio-Setup-2.0.0-x64.exe</code>（静默安装 / 卸载 / 快捷方式已验）</td></tr>
+            <tr><td>便携单文件 exe</td><td><code>build-package/ISG-Studio-Portable-2.0.0-x64.exe</code>（解到 TEMP 运行、退出清理已验）</td></tr>
+            <tr><td>打包脚本</td><td><code>tools/package.ps1</code>（便携目录/zip + NSIS 安装版 + 单文件便携版）</td></tr>
+            <tr><td>交付验收脚本</td><td><code>tools/package-acceptance.ps1</code></td></tr>
+            <tr><td>验证总入口</td><td><code>tools/phase1-verify.ps1</code></td></tr>
+            <tr><td>全量报告</td><td><code>docs/phase1-report.md</code>（每次运行覆盖，绑定 exe SHA256）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>复验命令</h3>
+      <p class="note">独立仓库：<code>tools\phase1-verify.ps1</code> 依赖 Electron oracle，未收录；本仓库复验请用 <code>tools\run-selftests.ps1</code> 与 <code>tools\package-acceptance.ps1</code>。下面保留原 monorepo 的命令作为历史记录。</p>
+      <div class="cmd">
+        <button class="copy" type="button" data-copy="cd <repo>\apps\isg-studio-cpp&#10;powershell -File tools\phase1-verify.ps1 -BuildDir build3 -SampleDir &quot;<samples>&quot;">复制</button>
+        <pre>cd <repo>\apps\isg-studio-cpp
+powershell -File tools\phase1-verify.ps1 -BuildDir build3 `
+    -SampleDir "<samples>"</pre>
+      </div>
+      <p class="note">预期：退出码 0；报告末行 <code>**结论：全部通过。**</code>；<code>外层判据 103 条，跳过 0 类</code>；exe SHA256 与当前文件一致。</p>
+      <div class="cmd">
+        <button class="copy" type="button" data-copy="cd <repo>\apps\isg-studio-cpp&#10;powershell -File tools\package.ps1 -BuildDir build3">复制</button>
+        <pre>powershell -File tools\package.ps1 -BuildDir build3</pre>
+      </div>
+      <p class="note">环境：VS 2026 / MSVC 14.51 <code>D:\visualstudio</code>；Windows SDK 10.0.26100；WebView2 运行时 155.0.4283.x；cmake/ninja 不在 PATH，必须走 <code>tools\build.ps1</code>。</p>
+    </section>
+
+    <section id="phases">
+      <div class="section-head"><span class="num">02</span><h2>全流程阶段记录</h2></div>
+
+      <div class="phases">
+        <article class="phase">
+          <div class="tag"><div class="p">PHASE 0</div><div class="s">GO</div></div>
+          <div>
+            <h3>技术验证：WebView2 能承载整个路线吗</h3>
+            <p>最小 spike 工程 + 自定义 <code>isg://</code> 协议 + 显式目录白名单 + 屏外可见窗口与两个 Chromium 开关。结论：<b>go</b>，不需要退到系统 Edge headless。</p>
+            <ul>
+              <li>控制器就绪 365 / 362 ms（冷 / 热）；页面就绪 2562 / 2540 ms；收尾 ~2900 ms，进程尾巴 49–57 ms。</li>
+              <li>真页 20 个作答点、4 段 <code>&lt;script data-bank&gt;</code>：缺卡 0、判错 0、抛错 0、脚本错误无。</li>
+              <li>CSP 做了 A/B：带 CSP 时 5 类外发全拦，不带时 0 条；协议白名单 6 类越界全拒。</li>
+              <li>最重的教训：虚拟主机映射服务的文档不触发 <code>WebResourceRequested</code>，CSP 曾“看起来挂了、其实没挂”。</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="phase">
+          <div class="tag"><div class="p">PHASE 1</div><div class="s">31 / 31</div></div>
+          <div>
+            <h3>立壳：单实例、窗口、协议、Key、渲染层</h3>
+            <p>CMake 工程、单实例、主窗口 + 离屏探针窗口、31 个 invoke 通道登记、settings/DPAPI/OSCrypt、渲染层原样搬入、金标准对拍链路。</p>
+            <ul>
+              <li>四套自测：settings 19、background 30、env 27、key-leak 10；协议 14 + live 5；UI 46。</li>
+              <li>跨实现 Key：Electron 写 → C++ 读；C++ 写 → Electron 读。真身是 <b>Chromium OSCrypt</b>，不是裸 DPAPI。</li>
+              <li>金标准 157557 字节、sha256 <code>c05a28cf…</code>；Debug 泄漏检查先自证会响，正常路径零泄漏。</li>
+              <li>三路互验修 22 项，其中 3 项是判据全绿时的真 bug（数组崩溃、桥 hash 来源检查、单实例消息窗口）。</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="phase">
+          <div class="tag"><div class="p">PHASE 2</div><div class="s gap">一条缺口</div></div>
+          <div>
+            <h3>抽取：PDFium + miniz + 文本</h3>
+            <p><code>extract</code> 33 条、<code>extract-pdf</code> 11 条、UI 46 条；三份真 PDF（33 / 25 / 143 页）页数、质量信号、栏序全部一致；<code>emptyMismatch=0</code>、<code>contentLossPages=0</code>。</p>
+            <ul>
+              <li><b>记账缺口：</b>逐页相似度 &gt;99% 未达到。中位数 0.9971 / 1.0000 / 0.9815；低相似度来自公式/表格阅读顺序，<b>不是丢字</b>，去空白后中位数三份都是 1.0。</li>
+              <li>三路互验修掉：线程入口异常直通 terminate、zip 解压炸弹、抽取线程不回收、页眉页脚归一化缺陷等。</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="phase">
+          <div class="tag"><div class="p">PHASE 3</div><div class="s">26 + 9</div></div>
+          <div>
+            <h3>网络与任务：SSE 留在 JS，C++ 只搬字节</h3>
+            <p>SSE 状态机、重试、退避、400 降级全部原样跑 oracle 的 <code>llm/index.js</code>；C++ 只做 WinHTTP 与 Key 边界。Key 只在特权层，页面拿哨兵。</p>
+            <ul>
+              <li><code>net-fault</code> 26 条：请求形状、测试连接、SSE 切包、400 降级、429 重试、<code>data: 0</code> 保活行。</li>
+              <li><code>pipeline-cancel</code> 9 条：约 0.26 秒 running → canceled，服务端记录连接提前断开。</li>
+              <li>抓到的静默失效：消息漏 <code>kind</code> 导致“产物写出来、任务永远 pending”；<code>.value()</code> 用在字符串上 0xC0000409。</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="phase">
+          <div class="tag"><div class="p">PHASE 4</div><div class="s">逐字节</div></div>
+          <div>
+            <h3>流水线与拼装：翻译，不重写</h3>
+            <p><code>pipeline</code> / <code>prompts</code> / <code>sources</code> / <code>chapters</code> / <code>revive</code> 逐字节复制进 <code>web/logic/</code>；八阶段、并发 3、取消、审题计票、<code>assemble.js</code> 原样调用。</p>
+            <ul>
+              <li>金标准仍 157557 字节、<code>c05a28cf…</code>，逐字节相同。</li>
+              <li><code>audit-pass</code>：假模型写 999 → 独立审题确认 → 重出 200；最终页面有 200、没有 999。</li>
+              <li><code>pipeline-mock</code> 当前 28 条（Phase 4 时 23 条，Phase 5 增加报告/探针/阶段对账）。</li>
+              <li>修掉“页面生成了、输入却被削掉”：<code>editedPages</code> 被界面瘦身剥掉、选项别名未归一、大回包不分块。</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="phase">
+          <div class="tag"><div class="p">PHASE 5</div><div class="s">31 + 20 + 31</div></div>
+          <div>
+            <h3>校验与修复闭环</h3>
+            <p>WebView2 探针窗口：注入、同目录副本、独立 environment/user data、导航守卫、<code>ProcessFailed</code>、计时器状态机、title/DOM/probe 错误、轮次间清浏览数据、关窗删副本。解析与 0.5% 容差在 <code>probe-parse.js</code>。</p>
+            <ul>
+              <li><code>e2e-mock</code> 31 条：真 PDF 33 页 → PDFium → 假模型 → 拼装 → 真探针。</li>
+              <li><code>verify</code> 20 条：好页 0 项 false；全部题库脚本改坏 → 失败项恰好是「题库条目」。</li>
+              <li><code>pipeline-repair</code> 31 条：代理注入 999999 → demo-checks 抓到 → repair 真重出、真重跑，如实写「仍有 1 项」。</li>
+              <li>demo 核对加载原页面时绝不删；独立证据文件 <code>repair-events.jsonl</code> 由假服务写、验证器读。</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="phase">
+          <div class="tag"><div class="p">PHASE 6</div><div class="s">收尾完成</div></div>
+          <div>
+            <h3>旁挂数据、带上一章、多章、多来源、清理、打包</h3>
+            <p>旁挂 <code>.isg.json</code> 写半身逐字节用 oracle <code>book.js</code>，读半身由 C++ 负责；<code>book:*</code> 四通道、<code>gen:start</code> 的 carry、多章/一册、多来源、取消清除、清理清单、便携打包全部接通。</p>
+            <ul>
+              <li><code>book</code> 20、<code>book-data</code> 20、<code>cleanup</code> 26、<code>multi-source</code> 8。</li>
+              <li><code>book-e2e</code> 28：第 13 章冻结 id 逐字保留、第 14 章落在 <code>c2-…</code>、进度搬家脚本在、两章章号都在；跨章 <code>demoA→demoB</code> 后 demo-checks 用最终 id 核对，第二册 42 项无 false。</li>
+              <li>便携目录 10.79 MB、zip 5.08 MB；最终补验另产出 NSIS 安装版与单文件便携版（见 §10）。</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="snapshot">
+      <div class="section-head"><span class="num">03</span><h2>最终验证快照</h2></div>
+      <p class="lead">全量：<b>103 条外层判据、0 跳过</b>。下表是各套自测的内部条数，不能相加（外层口径只算一次）。</p>
+
+      <div class="suitegrid">
+        <div class="tablewrap"><table>
+          <thead><tr><th>自测</th><th class="num">条数</th></tr></thead>
+          <tbody>
+            <tr><td>settings</td><td class="num">19</td></tr>
+            <tr><td>background</td><td class="num">30</td></tr>
+            <tr><td>env</td><td class="num">27</td></tr>
+            <tr><td>key-leak</td><td class="num">10</td></tr>
+            <tr><td>bridge</td><td class="num">38</td></tr>
+            <tr><td>protocol</td><td class="num">14</td></tr>
+            <tr><td>protocol-live</td><td class="num">5</td></tr>
+            <tr><td>probe</td><td class="num">3</td></tr>
+            <tr><td>ui</td><td class="num">46</td></tr>
+            <tr><td>extract</td><td class="num">33</td></tr>
+            <tr><td>extract-pdf</td><td class="num">11</td></tr>
+          </tbody>
+        </table></div>
+        <div class="tablewrap"><table>
+          <thead><tr><th>自测</th><th class="num">条数</th></tr></thead>
+          <tbody>
+            <tr><td>net-fault</td><td class="num">26</td></tr>
+            <tr><td>pipeline-cancel</td><td class="num">9</td></tr>
+            <tr><td>pipeline-mock</td><td class="num">28</td></tr>
+            <tr><td>verify</td><td class="num">20</td></tr>
+            <tr><td>pipeline-repair</td><td class="num">31</td></tr>
+            <tr><td>book</td><td class="num">20</td></tr>
+            <tr><td>book-e2e</td><td class="num">28</td></tr>
+            <tr><td>book-data</td><td class="num">20</td></tr>
+            <tr><td>cleanup</td><td class="num">26</td></tr>
+            <tr><td>multi-source</td><td class="num">8</td></tr>
+            <tr><td>e2e-mock</td><td class="num">31</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <h3>另外的硬判据</h3>
+      <div class="tablewrap">
+        <table>
+          <tbody>
+            <tr><td>金标准</td><td>157557 字节，sha256 <code>c05a28cf…</code>，expected / actual 逐字节相同</td></tr>
+            <tr><td>跨实现 Key</td><td>Electron 写 → C++ 读；C++ 写 → Electron 读，双向成功</td></tr>
+            <tr><td>泄漏</td><td><code>--leak-selftest</code> 故意漏 4 KB 会响；正常路径报告为空，自测 exit=0</td></tr>
+            <tr><td>构建</td><td>Debug 零告警；自有代码 <code>/W4</code> 零告警</td></tr>
+            <tr><td>资产</td><td><code>web/</code> 与「oracle + 4 处补丁」逐字节一致；bundle 与源一致且可被 node 解析</td></tr>
+            <tr><td>启动（本次）</td><td>控制器就绪 429 ms、页面就绪 596 ms、teardown 3553 ms；阈值 1000 / 6000 ms</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="accept">
+      <div class="section-head"><span class="num">04</span><h2>验收步骤</h2></div>
+
+      <h3>自动验收（必须做）</h3>
+      <ol>
+        <li>跑全量命令，确认退出码 0、报告末行 <code>**结论：全部通过。**</code>。</li>
+        <li>打开 <code>docs/phase1-report.md</code>：<code>外层判据 103 条，跳过 0 类</code>；报告 exe SHA256 与当前 exe 一致；<code>[BAD]</code> 行为 0。</li>
+        <li>抽查至少 3 份证据：<code>e2e-mock.json</code>、<code>pipeline-repair.json</code> + <code>.repair-events.jsonl</code>、<code>book-e2e.json</code>。</li>
+      </ol>
+
+      <h3>人工验收（建议做）</h3>
+      <ol>
+        <li>双击 <code>build-package/isg-studio-2.0.0/isg-studio.exe</code>（需要 WebView2 运行时；Win11 自带）。</li>
+        <li>设置页：配置模型、测试连接、拉模型列表、保存、换背景图。</li>
+        <li>拖入一份真实课件，完整生成一遍，亲眼看八个阶段与结果页校验报告。</li>
+        <li>结果页「重新校验」；打开产物 HTML，检查单页形态、判分、进度保存。</li>
+        <li>再生成第 14 章并勾选「带上第 13 章」，确认一册、章号、进度迁移提示。</li>
+        <li>跑砸/取消一次，确认清理清单与真实留下的一致。</li>
+      </ol>
+
+      <div class="callout">
+        <div class="h">验收时最该问的一句话</div>
+        <p>“这条判据如果我想蒙混过关，能不能让它绿？” 自动判据只能证明跑过，不能证明强度；下一节给出现成的变坏方法。</p>
+      </div>
+    </section>
+
+    <section id="adversarial">
+      <div class="section-head"><span class="num">05</span><h2>反作弊验收</h2></div>
+      <p class="lead">挑 1–2 条让判据失败一次。看不到红，就说明这条判据是散文。</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>改什么</th><th>应该看到</th></tr></thead>
+          <tbody>
+            <tr><td><code>probe_runner.cpp</code> 的 <code>kDomFactsJs</code> 结尾改回少一个 <code>)</code></td><td>报告少「顶栏总数」</td></tr>
+            <tr><td><code>probe_runner.cpp</code> 的 demo 调用把 <code>demo.checks</code> 改回 <code>demo</code></td><td>demo 核对变“0 组读数”</td></tr>
+            <tr><td><code>probe_runner.cpp</code> 的 <code>ownsProbeCopy</code> 恒置 true</td><td>demo 核对跑完会删成品页</td></tr>
+            <tr><td>oracle <code>book.js</code> 的 <code>no</code> 改回只认 <code>no</code></td><td><code>book-e2e</code> 的「第 13/14 章」判据变红</td></tr>
+            <tr><td><code>tools/mock-provider-server.js</code> 不再注入 <code>999999</code></td><td><code>pipeline-repair</code> 的 999999 判据变红</td></tr>
+            <tr><td><code>tools/phase1-verify.ps1</code> 的 <code>expectedCounts</code> 调 1</td><td>全量立刻红</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="gaps">
+      <div class="section-head"><span class="num">06</span><h2>已知缺口与限制</h2></div>
+      <p class="lead">这些不是隐藏问题，是验收时必须逐条确认的“没做/没验”。</p>
+
+      <div class="gaps">
+        <div class="gapitem"><span class="sev low">已解决</span><p><b>NSIS 安装包（2026-10-17 补验）。</b>装上 NSIS 后 <code>tools\package.ps1</code> 已产出安装版与单文件便携版，并由 <code>tools/package-acceptance.ps1</code> 实测通过（见 §10）。</p></div>
+        <div class="gapitem"><span class="sev high">未验</span><p><b>没有真实手机/平板浏览器验收。</b>移动端形态只有静态审查与无头探针，没有在 iOS/Android 真机上打开过。</p></div>
+        <div class="gapitem"><span class="sev mid">未复测</span><p><b>纲领 §3.5 六项硬指标未完整复测。</b>交付目录与启动时间有数；内存占用、安装包体积、冷/热启动的完整对照没有重新做。</p></div>
+        <div class="gapitem"><span class="sev mid">记账</span><p><b>逐页相似度 &gt;99% 未达到</b>（Phase 2 已记账）：不是丢字，公式/表格阅读顺序不同；去空白后中位数三份都是 1.0。</p></div>
+        <div class="gapitem"><span class="sev low">刻意分工</span><p><code>verify</code> / <code>book</code> 使用静态基准页与手写 sidecar，验的是通道/解析口径；真实生成链路由 <code>e2e-mock</code> / <code>book-e2e</code> / <code>pipeline-mock</code> 覆盖。</p></div>
+        <div class="gapitem"><span class="sev low">未穷举</span><p>修复轮只验证了“真的重出并如实报告仍有问题”，没有验证“修好后全绿”；<code>separate + carry + 多来源</code>组合矩阵未穷举。</p></div>
+        <div class="gapitem"><span class="sev low">未搬</span><p><code>text.js</code> 的切页逻辑仍在 C++（Phase 2 记账）；<code>book:pickFile</code> 是模态对话框，自动化里只验了方法存在与放行语义。</p></div>
+      </div>
+    </section>
+
+    <section id="design">
+      <div class="section-head"><span class="num">07</span><h2>关键设计与差异</h2></div>
+      <p class="lead">验收时需要知道“为什么这样做”，否则容易把翻译当成重写、把裁剪当成遗漏。</p>
+
+      <div class="callout">
+        <div class="h">这是翻译，不是重写</div>
+        <p>纯逻辑 JS 逐字节复制；提示词逐字复制；只有 I/O、窗口、网络传输、解析、加密这些宿主能力才重新实现。oracle 仍在 <code>apps/isg-studio/</code>，不删不冻。</p>
+      </div>
+      <div class="callout">
+        <div class="h">Key 不进页面</div>
+        <p>provider 配置给页面的是 <code>__ISG_HOST_KEY__</code> 哨兵；<code>net.cpp</code> 发出前删掉哨兵头、注入真 Key，并核对 URL origin。渲染层拿不到明文。</p>
+      </div>
+      <div class="callout">
+        <div class="h">两个方向都防大消息</div>
+        <p>宿主→页面分块（skill/契约/任务快照/回包）；页面→宿主也分块（revive 回包、finish 的 carry 裁剪、consoleErrors 截断）。单条 WebView2 消息超限会静默丢。</p>
+      </div>
+      <div class="callout">
+        <div class="h">oracle 侧主动修了两处静默回归</div>
+        <p><code>pipeline/index.js</code> 的 demos 映射补 <code>checks</code>；<code>book.js</code> 的 <code>chapter.no</code> 兼容 <code>number</code>。两处都先改 oracle、再 <code>sync-web.ps1</code> 逐字节同步。</p>
+      </div>
+      <div class="callout">
+        <div class="h">删除前先看目标</div>
+        <p>探针副本按 <code>_probe_&lt;pid&gt;_&lt;序号&gt;_</code> 形状认；<code>ownsProbeCopy</code> 区分“我们写的副本”和“demo 加载的原页面”；清理通道重新扫一遍清单，只删仍在清单内的路径。</p>
+      </div>
+    </section>
+
+    <section id="evidence">
+      <div class="section-head"><span class="num">08</span><h2>证据索引</h2></div>
+      <p class="note"><code>_verify-out/</code> 是本地运行产物（每次验证重新生成），<b>不提交</b>；仓库归档的证据是 <code>docs/evidence/arch-bench.json</code> 与 <code>docs/portable-run.png</code>。</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>证据</th><th>位置</th></tr></thead>
+          <tbody>
+            <tr><td>全量验证报告</td><td><code>docs/phase1-report.md</code></td></tr>
+            <tr><td>Phase 0</td><td><code>docs/phase0-report.md</code>、<code>spike/_fixtures/bench-summary.json</code></td></tr>
+            <tr><td>Phase 1</td><td><code>docs/phase1-design.md</code>、<code>docs/guidance2.md</code></td></tr>
+            <tr><td>Phase 2</td><td><code>docs/phase2-report.md</code>、<code>_verify-out/phase2/cmp-*.json</code></td></tr>
+            <tr><td>Phase 3</td><td><code>docs/phase3-report.md</code>、<code>_verify-out/selftest/net-fault.json</code>、<code>pipeline-cancel.json</code></td></tr>
+            <tr><td>Phase 4</td><td><code>docs/phase4-report.md</code>、<code>tools/golden/out/</code></td></tr>
+            <tr><td>Phase 5</td><td><code>docs/phase5-report.md</code>、<code>docs/guidance7.md</code>、<code>_verify-out/selftest/{e2e-mock,verify,pipeline-repair}.json</code></td></tr>
+            <tr><td>Phase 6</td><td><code>docs/phase6-report.md</code>、<code>_verify-out/selftest/{book,book-data,book-e2e,cleanup,multi-source}.json</code></td></tr>
+            <tr><td>打包</td><td><code>build-package/</code>、<code>tools/package.ps1</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="signoff">
+      <div class="section-head"><span class="num">09</span><h2>验收签署清单</h2></div>
+      <div class="checklist">
+        <label><input type="checkbox"><span>全量验证命令退出码 0，103 条外层判据、0 跳过</span></label>
+        <label><input type="checkbox"><span>报告 exe SHA256 与当前 exe 一致</span></label>
+        <label><input type="checkbox"><span>自动报告里 <code>[BAD]</code> 行为 0</span></label>
+        <label><input type="checkbox"><span>人工打开便携版，完成一次真实课件生成</span></label>
+        <label><input type="checkbox"><span>设置页测试连接 / 保存 / 背景图 / 导入导出抽查</span></label>
+        <label><input type="checkbox"><span>结果页校验报告与「重新校验」可用</span></label>
+        <label><input type="checkbox"><span>带上一章：一册、章号、进度搬家、冻结 id 抽查</span></label>
+        <label><input type="checkbox"><span>取消/失败后的清理清单与真实文件一致</span></label>
+        <label><input type="checkbox"><span>反作弊：至少挑一条判据让它失败</span></label>
+        <label><input type="checkbox"><span>已知缺口逐条确认（真机、六项硬指标、Phase 2 相似度、静态夹具等）</span></label>
+        <label><input type="checkbox"><span>交付形态：<code>tools/package-acceptance.ps1</code> 跑一遍（本次已全过）</span></label>
+      </div>
+    </section>
+
+    <section id="final">
+      <div class="section-head"><span class="num">10</span><h2>最终交付补验</h2></div>
+      <p class="lead">接手验收时补做的三件事，都是自动判据覆盖不到的；改动后已重新跑完 103 条外层判据（0 跳过、0 <code>[BAD]</code>）。</p>
+
+      <div class="callout">
+        <div class="h">版本：C++ 2.0.0，Electron 1.4.2（有意分叉）</div>
+        <p>宿主从 Electron 换成 C++/WebView2 是主架构变更。C++ 版本唯一真源是工程根 <code>VERSION</code>，CMake、exe 的 VERSIONINFO、安装包都跟它走；Electron 1.4.2 保持不动，继续当迁移与对拍基准。两者共用 <code>%APPDATA%\isg-studio</code>，设置、OSCrypt Key、历史与旁挂数据仍互相可读。</p>
+      </div>
+
+      <div class="callout">
+        <div class="h">200% 缩放下界面发虚 —— 已修</div>
+        <p>原 exe 清单没有 DPI 感知声明，Windows 会位图拉伸整个窗口。已补 PerMonitorV2 清单、VERSIONINFO、<code>WM_DPICHANGED</code>，并按 <code>GetDpiForSystem()</code> 把 DIP 尺寸换算成物理像素。实测进程 awareness=2、窗口 2360×1630 物理像素，截图清晰。</p>
+      </div>
+      <div class="callout">
+        <div class="h">安装后立刻启动的控制器竞态 —— 已加兜底</div>
+        <p>“静默安装 → 立刻启动”序列里 <code>CreateCoreWebView2Controller</code> 偶发 E_ABORT（0x80004004）。现在失败后在计时器下一拍重试，最多 3 次（0.4 / 0.8 / 1.2 秒）。重试分支用临时强制失败钩子验证过，日志出现「第 1 次重试」后导航成功；钩子已删除。</p>
+      </div>
+      <div class="callout">
+        <div class="h">安装版 + 单文件便携版 —— 已产出并实测</div>
+        <p><code>build-package/ISG-Studio-Setup-2.0.0-x64.exe</code>（3.83 MB）与 <code>ISG-Studio-Portable-2.0.0-x64.exe</code>（3.79 MB）。安装版按当前用户安装、建快捷方式与卸载项，卸载保留 <code>%APPDATA%\isg-studio</code>；便携版解到 TEMP 运行、退出连空目录一起清掉。<code>tools/package-acceptance.ps1</code> 31 项全过。</p>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>产物</th><th>SHA256</th></tr></thead>
+          <tbody>
+            <tr><td><code>ISG-Studio-Setup-2.0.0-x64.exe</code></td><td class="mono">c37509066bec56de…</td></tr>
+            <tr><td><code>ISG-Studio-Portable-2.0.0-x64.exe</code></td><td class="mono">7e265ce07fc53680…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <div class="h">架构对比：体积与抽取是主要收益，启动/内存基本持平</div>
+        <p>同机、同 web 资产、同一份 143 页 PDF：单文件便携版 <b>127.05 MB → 3.97 MB</b>（小 96.9%），安装目录 <b>444.12 MB → 11.32 MB</b>（小 97.5%）；PDF 抽取 <b>624 ms → 205 ms</b>（快 3.0×）；热启动 UI 就绪 567 ms → 654 ms、私有内存 91.3 MB → 96.0 MB，基本持平。完整口径见 <a href="arch-bench.md"><code>arch-bench.md</code></a>。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>讲练一体工作台 · C++ 重写 · Phase 0–6 验收报告</span>
+    <span class="mono">2026-10-17 · exe 34a69352 · v2.0.0 · 103/103</span>
+  </footer>
+</div>
+
+<script>
+  document.querySelectorAll('.copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var text = btn.getAttribute('data-copy') || '';
+      function done() {
+        var old = btn.textContent;
+        btn.textContent = '已复制';
+        setTimeout(function () { btn.textContent = old; }, 1400);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand('copy'); done(); } catch (e) { btn.textContent = '请手动复制'; }
+          document.body.removeChild(ta);
+        });
+      } else {
+        btn.textContent = '请手动复制';
+      }
+    });
+  });
+</script>

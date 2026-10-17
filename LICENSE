@@ -1,0 +1,30 @@
+MIT License
+
+Copyright (c) 2026 PurpleRice-wasd
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+本仓库另含第三方素材：
+skills/interactive-study-guide/third-party/dafeiyu-pet/
+（来自 https://github.com/1190fasheqi/dafeiyu-pet 的 commit 5b0e018，同样为 MIT）
+其许可原文在该目录的 LICENSE.txt，出处、取用文件、文件校验值与本仓库做过的改动见该目录的 README.md。
+该素材还出现在：quiz-engine.js 的 FISH 常量（base64 内嵌）与 docs/preview-*.png 预览截图。
+分发时请一并保留上述许可与署名。

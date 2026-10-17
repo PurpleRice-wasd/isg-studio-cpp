@@ -1,0 +1,38 @@
+﻿#pragma code_page(65001)
+
+#include <windows.h>
+
+/* DPI 感知声明必须嵌进 exe，不能只靠运行期 API：
+   清单在进程启动时就生效，而 SetProcessDpiAwarenessContext 只能在本进程
+   还没有创建任何窗口之前调用。两处都留着是刻意的冗余。 */
+1 RT_MANIFEST "isg-studio.manifest"
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION     2,0,0,0
+ PRODUCTVERSION  2,0,0,0
+ FILEFLAGSMASK   0x3fL
+ FILEFLAGS       0x0L
+ FILEOS          VOS_NT_WINDOWS32
+ FILETYPE        VFT_APP
+ FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080404B0"
+        BEGIN
+            VALUE "CompanyName",      "interactive-study-guide"
+            VALUE "FileDescription",  "讲练一体工作台"
+            VALUE "FileVersion",      "2.0.0"
+            VALUE "InternalName",     "isg-studio"
+            VALUE "LegalCopyright",   "MIT License"
+            VALUE "OriginalFilename", "isg-studio.exe"
+            VALUE "ProductName",      "讲练一体工作台"
+            VALUE "ProductVersion",   "2.0.0"
+            VALUE "Comments",         "C++ 宿主 + 系统 WebView2"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 1200
+    END
+END

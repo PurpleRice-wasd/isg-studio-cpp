@@ -1,0 +1,8 @@
+# 文本统一按 LF 存/检出：金标准 HTML 与 web/ 资产有**逐字节对拍**判据，
+# Windows 上的 core.autocrlf 会把字节改掉（改完判据就红，且很难看出是行尾问题）。
+* text=auto eol=lf
+
+# 二进制文件别做行尾转换（第三方素材必须保持逐字节一致，许可校验才对得上）
+*.png binary
+*.jpg binary
+*.ico binary

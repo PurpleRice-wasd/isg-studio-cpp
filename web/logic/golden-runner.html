@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>golden runner</title>
+</head>
+<body>
+<!--
+  金标准对拍的**执行页**（纲领 §4.2）。
+
+  它不参与交付，只在 `--selftest=golden` 时被加载。三件事：
+    1. 加载 logic-bundle.js（web/logic/ 下那两个文件**原样**包了一层壳）；
+    2. 等宿主把夹具 postMessage 过来；
+    3. 调 assemble()，把产出的 HTML 原样送回宿主去逐字节比。
+
+  为什么夹具由宿主送、而不是写死在这一页里：夹具里含骨架页全文（约 100 KB），
+  内联进 HTML 会碰到 `</script>` 与 `<!--` 这两类会**顶破 HTML 解析器**的序列。
+  走 postMessage 就没有这一层转义问题 —— 传的是数据，不是文档。
+
+  为什么结果也走 postMessage 而不是 return：WebView2 的 `ExecuteScript` 不等 Promise，
+  返回 Promise 时拿到的是 `{}`（见 bridge.h 里那段说明）。
+-->
+<!--
+  ⚠️ 这里**没有** `<script src="logic-bundle.js">`。
+  试过：`file://` 页面加载同目录脚本在这台机器上被拦掉了（标签静默失败，
+  页面上表现为"bundle 没加载"，而浏览器不会为子资源加载失败报错）。
+  改成由宿主用 `AddScriptToExecuteOnDocumentCreated` **注入** ——
+  那条路不经过 HTML 解析器、也不受 file:// 子资源规则影响，而且
+  "注入没有生效"会在下面被显式判成失败，不会静默。
+-->
+<script>
+/*
+  ⚠️ 夹具**不经过 postMessage**。
+  试过两条路，都不行：对象直接过消息层会被 Chromium 的 base::Value 按键名排序（键序变了，
+  产物就不是逐字节相同）；改成把 JSON 塞进字符串再传，161 KB 的消息在页面上收不到
+  （没有报错，就是监听器不触发）。最后改成最笨也最确定的一条：
+  **宿主用 ExecuteScript 把夹具写进页面的一个全局变量**，页面轮询它。
+  这条路上没有序列化、没有消息边界、没有大小上限的猜测 —— 只有"到了"和"没到"。
+*/
+(function () {
+  'use strict';
+  function send(payload) {
+    try {
+      window.chrome.webview.postMessage(JSON.stringify({ __isg: 1, kind: 'selftestResult', payload: payload }));
+    } catch (e) {}
+  }
+  function trace(text) {
+    try { window.chrome.webview.postMessage(JSON.stringify({ __isg: 1, kind: 'trace', text: text })); } catch (e) {}
+  }
+
+  var polls = 0;
+  var timer = setInterval(function () {
+    polls++;
+    if (polls > 600) {                        // 30 秒还没等到：明确失败，别静静地转圈
+      clearInterval(timer);
+      send({ ok: false, what: 'golden', html: '', lines: ['  [BAD] 等了 30 秒也没等到夹具注入'] });
+      return;
+    }
+    if (!window.__ISG_GOLDEN_READY) return;
+    clearInterval(timer);
+
+    var lines = [];
+    try {
+      if (!window.__isgLogic) throw new Error('logic-bundle.js 没加载（注入没生效？）');
+      lines.push('  [ok]  logic-bundle 已加载：' + window.__isgLogic.version.join(', '));
+      var assemble = window.__isgLogic.require('./assemble').assemble;
+      if (typeof assemble !== 'function') throw new Error('assemble 不是函数');
+      lines.push('  [ok]  取到 assemble()');
+
+      var fixture = JSON.parse(window.__ISG_GOLDEN_TEXT);
+      lines.push('  [ok]  夹具已解析（' + window.__ISG_GOLDEN_TEXT.length + ' 字符）');
+      var out = assemble(fixture);
+      lines.push('  [ok]  拼装成功：' + out.html.length + ' 字符，作答点 ' + out.stats.total
+                 + '，单元 ' + out.stats.units + '，演示 ' + out.stats.demos);
+      send({ ok: true, what: 'golden', html: out.html, lines: lines });
+    } catch (e) {
+      lines.push('  [BAD] 拼装抛错：' + String((e && e.message) || e));
+      send({ ok: false, what: 'golden', html: '', lines: lines });
+    }
+  }, 50);
+})();
+</script>
+</body>
+</html>
