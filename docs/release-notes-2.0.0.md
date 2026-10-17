@@ -1,37 +1,37 @@
-# cpp版 2.0.0 · 讲练一体工作台
+# cpp版 2.0.0
 
-宿主从 Electron 换成 **C++ / Win32 + 系统 WebView2**。界面、讲义生成逻辑、skill 内核与
-Electron 1.4.2 完全复用；1.4.2 保留为迁移与逐字节对拍的基准。
+把桌面宿主从 Electron 换成 C++ + 系统 WebView2。界面、生成逻辑和 skill 内核仍是同一份，用起来和 1.4.2 一样。
 
 ## 下载
 
-- `ISG-Studio-Portable-2.0.0-x64.exe` —— 单文件便携版，双击即用（解到 TEMP，退出清理）
-- `ISG-Studio-Setup-2.0.0-x64.exe` —— 当前用户安装版，含桌面/开始菜单快捷方式与卸载项
+- [单文件便携版](https://github.com/PurpleRice-wasd/isg-studio-cpp/releases/download/v2.0.0/ISG-Studio-Portable-2.0.0-x64.exe)：双击即用，退出后自动清理临时文件。
+- [安装版](https://github.com/PurpleRice-wasd/isg-studio-cpp/releases/download/v2.0.0/ISG-Studio-Setup-2.0.0-x64.exe)：安装到当前用户，带桌面和开始菜单快捷方式。
+- [SHA256 校验值](https://github.com/PurpleRice-wasd/isg-studio-cpp/releases/download/v2.0.0/SHA256SUMS-2.0.0.txt)：下载后可以核对文件是否完整。
 
-需要 **WebView2 运行时**（Windows 11 自带；Windows 10 若缺请先安装）。
+需要 Windows 10/11 和 WebView2 运行时（Windows 11 自带；Windows 10 若缺少请先安装）。
 
 ## 这次更新
 
-- **包小了一个数量级**：单文件 3.97 MB（Electron 版 127.05 MB），安装目录 11.32 MB
-  （444.12 MB）。
-- **PDF 抽取快约 3 倍**：同一份 143 页 PDF，205 ms vs 624 ms。
-- **启动与内存基本持平**：热启动 UI 就绪 654 ms（Electron 567 ms），私有内存 96.0 MB
-  （91.3 MB）。
-- **200% 缩放下不再发虚**：补了 PerMonitorV2 DPI 感知与物理像素换算。
-- **启动更稳**：安装后立刻启动偶发的 WebView2 控制器 `E_ABORT` 现在会重试。
-- **卸载更干净**：从安装目录启动卸载器也能删干净；用户配置与历史保留。
-- **兼容原数据**：同一份 `%APPDATA%\isg-studio`、OSCrypt 加密的 Key、历史与旁挂
-  `.isg.json`，不需要迁移。
+- 安装包小了很多：单文件 3.97 MB（原来约 127 MB），安装后约 11 MB（原来约 444 MB）。
+- PDF 抽取快约 3 倍：同一份 143 页 PDF，205 ms（原来 624 ms）。
+- 启动和内存基本持平：页面就绪 654 ms（原来 567 ms），私有内存 96 MB（原来 91 MB）。
+- 高分屏更清晰：修复了 200% 缩放下界面发虚的问题。
+- 启动更稳：安装后立刻启动偶发的 WebView2 初始化失败会自动重试。
+- 卸载更干净：不会留下空目录，用户配置和历史会保留。
+- 原来的数据可以直接用：设置、加密的 API Key、历史和学习进度都与 1.4.2 共用，不需要迁移。
 
 ## 验证
 
-- 103 条外层判据全过、0 跳过；交付验收 31 项全过；金标准拼装 157557 字节逐字节相同。
-- 架构对比口径与原始数据：`docs/arch-bench.md`、`docs/evidence/arch-bench.json`。
+- 103 项自动检查全部通过，0 跳过。
+- 安装、启动、抽取、卸载和便携版共 31 项交付检查全部通过。
+- 与 1.4.2 的页面拼装结果逐字节一致。
+- 架构对比的方法和原始数据见 [arch-bench.md](https://github.com/PurpleRice-wasd/isg-studio-cpp/blob/main/docs/arch-bench.md) 和 [arch-bench.json](https://github.com/PurpleRice-wasd/isg-studio-cpp/blob/main/docs/evidence/arch-bench.json)。
 
 ## 已知限制
 
-- 真实模型生成需要自备 API Key 与额度（仓库内用假模型跑全链路）。
-- 未在真实手机/平板上验收移动端形态；六项硬指标未完整复测。
-- PDF 逐页相似度 >99% 未达到（不是丢字，公式/表格阅读顺序不同）。
+- 真实生成需要自备 API Key 和额度；仓库里的测试使用本地假模型。
+- 没有在真实手机上验收生成结果的移动端形态。
+- 内存、安装包体积、冷/热启动的完整对照还没有复测。
+- PDF 逐页相似度没有达到 99%，原因是公式和表格的阅读顺序不同，不是丢字。
 
-**完整更新记录**：`CHANGELOG.md`。
+完整更新记录见 [CHANGELOG.md](https://github.com/PurpleRice-wasd/isg-studio-cpp/blob/main/CHANGELOG.md)。
